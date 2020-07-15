@@ -14,6 +14,7 @@
 #include <cassert>
 #include <iostream>
 #include <tuple>
+#include <ctime>
 
 #include "stdio.h"
 

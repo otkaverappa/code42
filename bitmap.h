@@ -149,6 +149,11 @@ private:
 };
 
 class SolidBlockComputation {
+public:
+    enum { BLACK_PIXEL_VALUE = 0,
+           WHITE_PIXEL_VALUE = 1,
+           INVALID_PIXEL_VALUE = -1,
+         };
 private:
     const Bitmap& bitmap;
     vector< vector < int > > partialSum;
@@ -156,15 +161,21 @@ public:
     SolidBlockComputation( const Bitmap& bitmap ) : bitmap( bitmap ) {
         preprocessBitmap();
     }
+    bool isSolidWhiteBlock( const ii& topLeft, const ii& bottomRight ) {
+        return isSolidBlock( topLeft, bottomRight ).second == WHITE_PIXEL_VALUE;
+    }
+    bool isSolidBlackBlock( const ii& topLeft, const ii& bottomRight ) {
+        return isSolidBlock( topLeft, bottomRight ).second == BLACK_PIXEL_VALUE;
+    }
     pair< bool, int > isSolidBlock( const ii& topLeft, const ii& bottomRight ) {
         int whitePixelCount = pixelCount( topLeft, bottomRight );
 
         if( whitePixelCount == 0 )
-            return { true, 0 };
+            return { true, BLACK_PIXEL_VALUE };
         else if( whitePixelCount == querySize( topLeft, bottomRight ) )
-            return { true, 1 };
+            return { true, WHITE_PIXEL_VALUE };
         else
-            return { false, -1 };
+            return { false, INVALID_PIXEL_VALUE };
     }
     int pixelCount( const ii& topLeft, const ii& bottomRight, bool whitePixel=true ) {
         bitmap.boundsCheckAndAssert( topLeft );
@@ -183,6 +194,27 @@ public:
         return whitePixel ? sum : totalElements - sum;
     }
 private:
+    void getTopLeftAndBottomRight( const ii& corner1, const ii& corner2,
+                                   ii& topLeft, ii& bottomRight ) {
+        if( corner1.first <= corner2.first ) {
+            if( corner1.second <= corner2.second ) {
+                topLeft = corner1;
+                bottomRight = corner2;
+            }
+            else {
+                topLeft = { corner1.first, corner2.second };
+                bottomRight = { corner2.first, corner1.second };
+            }
+        } else {
+            if( corner1.second <= corner2.second ) {
+                topLeft = { corner2.first, corner1.second };
+                bottomRight = { corner1.first, corner2.second };
+            } else {
+                topLeft = corner2;
+                bottomRight = corner1;
+            }
+        }
+    }
     int querySize( const ii& topLeft, const ii& bottomRight ) {
         int queryRows = bottomRight.first - topLeft.first + 1;
         int queryCols = bottomRight.second - topLeft.second + 1;
