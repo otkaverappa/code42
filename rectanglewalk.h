@@ -4,8 +4,9 @@
 #include "common.h"
 
 class RectangleWalk {
-private:
+public:
     typedef pair< ii, ii > Rectangle;
+private:
     const Bitmap& bitmap;
     SolidBlockComputation compute;
     ii startPos, endPos;
@@ -13,7 +14,8 @@ public:
     RectangleWalk( const Bitmap& bitmap ) : bitmap( bitmap ),
                    compute( bitmap ) {}
 
-    int rectangleWalk( const ii& startPos, const ii& endPos ) {
+    int rectangleWalk( const ii& startPos, const ii& endPos,
+                       vector< Rectangle > & path ) {
         bitmap.boundsCheckAndAssert( startPos );
         bitmap.boundsCheckAndAssert( endPos );
         assert( bitmap.isSet( startPos ) && bitmap.isSet( endPos ) );
@@ -22,6 +24,7 @@ public:
         bool searchSuccessful = false;
         //startState and endState are unit rectangles.
         Rectangle startState( startPos, startPos ), endState( endPos, endPos );
+        Rectangle curState;
         map< Rectangle, Rectangle > processedMoves;
         processedMoves[ startState ] = startState;
         queue< Rectangle > q;
@@ -30,7 +33,7 @@ public:
         while( !q.empty() ) {
             int N = q.size();
             while( N -- ) {
-                Rectangle & curState = q.front(); q.pop();
+                curState = q.front(); q.pop();
                 Rectangle newState;
                 const auto & [ u, v ] = curState.first;
                 const auto & [ x, y ] = curState.second;
@@ -84,7 +87,6 @@ public:
                         }
                     }
                 }
-
                 //Generate rectangles obtained by shrinking.
                 for( int startRow = u; startRow <= x; ++startRow ) {
                     for( int startCol = v; startCol <= y; ++startCol ) {
@@ -103,6 +105,13 @@ public:
 
         endOfSearch:
         if( !searchSuccessful ) totalMoves = -1;
+        else {
+            while( true ) {
+                path.push_back( curState );
+                if( curState == startState ) break;
+                curState = processedMoves[ curState ];
+            }
+        }
         return totalMoves;
     }
 private:
@@ -150,8 +159,36 @@ public:
         ii startPos = { 0, 0 };
         ii endPos = { grid.size() - 1, grid[0].size() - 1 };
 
-        int pathLen = walk.rectangleWalk( startPos, endPos );
-        printf( "Path Length = %d\n", pathLen );
+        vector< RectangleWalk::Rectangle > path;
+        int pathLen = walk.rectangleWalk( startPos, endPos, path );
+        if( pathLen == -1 ) {
+            printf( "No rectangle walk exists.\n" );
+        } else {
+            RectangleWalk::Rectangle prevPos;
+            int sz = path.size();
+            for( int i = sz; i > 0; --i ) {
+                const auto & [ topLeft, bottomRight ] = path[i - 1];
+                if( i == sz ) {
+                    printf( "Starting position: [ %2d, %2d ] [ %2d, %2d ]\n",
+                            topLeft.first + 1, topLeft.second + 1,
+                            bottomRight.first + 1, bottomRight.second + 1 );
+                } else {
+                    bool expand = true;
+                    const auto & [ prevTopLeft, prevBottomRight ] = prevPos;
+                    if( topLeft.first >= prevTopLeft.first && topLeft.second >= prevTopLeft.second &&
+                        bottomRight.first <= prevBottomRight.first &&
+                        bottomRight.second <= prevBottomRight.second )
+                        expand = false;
+                    printf( "%s New Position: [ %2d, %2d ] [ %2d, %2d ]\n",
+                            expand ? "Expand" : "Contract",
+                            topLeft.first + 1, topLeft.second + 1,
+                            bottomRight.first + 1, bottomRight.second + 1 );
+                    prevPos = path[i - 1];
+                    if( i == 1 )
+                        printf( "Reached End position !\n" );
+                }
+            }
+        }
     }
 };
 
