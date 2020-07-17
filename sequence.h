@@ -1,11 +1,20 @@
+#ifndef __SEQUENCE_H__
+#define __SEQUENCE_H__
+
 #include "common.h"
 
 class Sequence {
 public:
     //Computes the maximum subsequence sum in the input integer array v.
     //If v contains only negative integers, then the return value is 0.
-    int maxArraySum( const vector< int > &v );
-    int maxRectangleSum( const vector< vector< int > > & m );
+    static int maxArraySum( const vector< int > &v );
+
+    //Given a matrix m, computes the maximum sum in any rectangle within
+    //the matrix m. If m contains only negative integers, then the return value is 0.
+    static int maxRectangleSum( const vector< vector< int > > & m );
+
+    //Width of the largest square of 1's in the bitmap m containing 1's and 0's.
+    static int largestSquare( const vector< vector< int > > & m );
 };
 
 int Sequence::maxArraySum( const vector< int > &v ) {
@@ -46,10 +55,45 @@ int Sequence::maxRectangleSum( const vector< vector< int > > & m ) {
     return sol;
 }
 
+int Sequence::largestSquare( const vector< vector< int > > & m ) {
+    int rows = m.size(), cols;
+    if( rows == 0 || ( ( cols = m[0].size() ) == 0 ) )
+        return 0;
+
+    int maxSoFar = 0;
+    vector < int > prevRow( cols, 0 ), curRow( cols, 0 );
+    vector < int > *prevRowPtr = &prevRow, *curRowPtr = &curRow;
+
+    for( int i = 0; i < rows; ++i ) {
+        assert( m[i].size() == cols );
+        for( int j = 0; j < cols; ++j ) {
+                int optSize;
+                switch( m[i][j] ) {
+                    case 0: optSize = (*curRowPtr)[j] = 0; break;
+                    case 1:
+                        optSize = (*prevRowPtr)[j];
+                        optSize = min( optSize, j > 0 ? (*prevRowPtr)[j-1] : 0 );
+                        optSize = min( optSize, j > 0 ? (*curRowPtr)[j-1] : 0 );
+                        (*curRowPtr)[j] = ++optSize;
+                        break;
+                    default:
+                        assert( false );
+                }
+                maxSoFar = max( maxSoFar, optSize );
+        }
+        swap( prevRowPtr, curRowPtr );
+    }
+    return maxSoFar;
+}
+
 class SequenceTest {
 public:
-    void runTest() {
+    static void runTest() {
+        largestSquareTest();
     }
 private:
-
+    static void largestSquareTest() {
+    }
 };
+
+#endif // __SEQUENCE_H__
