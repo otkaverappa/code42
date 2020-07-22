@@ -13,6 +13,7 @@
 #include <string>
 #include <algorithm>
 #include <cassert>
+#include <type_traits>
 #include <iostream>
 #include <tuple>
 #include <ctime>
