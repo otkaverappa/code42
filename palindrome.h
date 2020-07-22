@@ -1,6 +1,8 @@
-#include "common.h"
+#ifndef __PALINDROME_H__
+#define __PALINDROME_H__
 
-using namespace std;
+#include "common.h"
+#include "stringsequence.h"
 
 class Palindrome {
 public:
@@ -251,10 +253,11 @@ private:
 class PalindromeTest {
 public:
     static void runTest() {
-        //longestPalindromicSubsequenceTest();
-        //shortestPalindromicSupersequenceTest();
-        //smallestPalindromicDecompositionTest();
-        //palindromicDecompositionCountTest();
+        isPalindromeTest();
+        longestPalindromicSubsequenceTest();
+        shortestPalindromicSupersequenceTest();
+        smallestPalindromicDecompositionTest();
+        palindromicDecompositionCountTest();
         shortestMetaPalindromeTest();
     }
 private:
@@ -275,9 +278,16 @@ private:
         };
         for( auto & [ str, expectedLen ] : testcases ) {
             string lps = Palindrome::longestPalindromicSubsequence( str );
-            assert( size( lps ) == expectedLen );
-            printf( "Longest palindromic subsequence of (%s) is (%s), length=%d\n",
-                    str.c_str(), lps.c_str(), expectedLen );
+            assert( lps.size() == expectedLen );
+            assert( StringSequence::isSubsequence( str, lps ) );
+            //Longest palindromic subsequence of a string S, is equal to
+            //the longest common subsequence of S and its reversal.
+            string str_reverse = str;
+            reverse( str_reverse.begin(), str_reverse.end() );
+            string lpsUsinglcs = StringSequence::longestCommonSubsequence( str, str_reverse );
+            assert( lpsUsinglcs.size() == expectedLen );
+            printf( "Longest palindromic subsequence of (%s) is (%s), length=%d [%s]\n",
+                    str.c_str(), lps.c_str(), expectedLen, lpsUsinglcs.c_str() );
         }
     }
     static void shortestPalindromicSupersequenceTest() {
@@ -290,6 +300,7 @@ private:
             string sps = Palindrome::shortestPalindromicSupersequence( str );
             assert( sps.size() == expectedLen );
             assert( Palindrome::isPalindrome( sps ) );
+            assert( StringSequence::isSubsequence( sps, str ) );
             printf( "Shortest palindromic supersequence of (%s) is (%s), length=%d\n",
                     str.c_str(), sps.c_str(), expectedLen );
         }
@@ -368,3 +379,5 @@ private:
         }
     }
 };
+
+#endif // __PALINDROME_H__
