@@ -3,53 +3,83 @@
 
 class BitVector {
 private:
-    unsigned int bitVector;
-    int numberOfBits;
+    unsigned int * bitVector;
+    unsigned int fractionalBits;
+    unsigned int numberOfBits;
+    unsigned int size_;
+    static const int bitsPerInteger = sizeof( unsigned int ) * 8;
 private:
     void boundsCheck( int bitNumber ) {
         assert( bitNumber >= 0 && bitNumber < numberOfBits );
     }
 public:
-    BitVector( int numberOfBits ) : numberOfBits( numberOfBits ), bitVector(0) {
-        assert( numberOfBits > 0 &&
-                numberOfBits <= sizeof( unsigned int ) * 8 );
+    BitVector( unsigned int numberOfBits ) : numberOfBits( numberOfBits ) {
+        fractionalBits = numberOfBits % bitsPerInteger;
+        size_ = ( numberOfBits / bitsPerInteger ) + ( fractionalBits ? 1 : 0 );
+
+        bitVector = new unsigned int [ size_ ] ();
     }
+    ~BitVector() { delete [] bitVector; }
     bool set( int bitNumber ) {
         boundsCheck( bitNumber );
-        bitVector |= ( 0x1 << bitNumber );
+        bitVector[ bitNumber / bitsPerInteger ] |= ( 0x1 << ( bitNumber % bitsPerInteger ) );
     }
     bool reset( int bitNumber ) {
         boundsCheck( bitNumber );
-        bitVector &= ~( 0x1 << bitNumber );
+        bitVector[ bitNumber / bitsPerInteger ] &= ~( 0x1 << ( bitNumber % bitsPerInteger ) );
     }
     bool isSet( int bitNumber ) {
         boundsCheck( bitNumber );
-        return bitVector & ( 0x1 << bitNumber );
+        return bitVector[ bitNumber / bitsPerInteger ] & ( 0x1 << ( bitNumber % bitsPerInteger ) );
     }
     bool any() {
-        return bitVector != 0;
+        for( int i = 0; i < size_; ++i ) {
+            if( bitVector[i] != 0 )
+                return true;
+        }
+        return false;
     }
     bool all() {
-        return bitVector == ( ( 0x1 << numberOfBits ) - 1 );
+        int i = 0;
+        for( ; i < size_ - 1; ++i ) {
+            if( bitVector[i] != ~0 )
+                return false;
+        }
+        //i is the last valid index for bitVector.
+        if( fractionalBits == 0 )
+            return bitVector[i] == ~0;
+        return bitVector[i] == ~ ( ~0 << fractionalBits );
     }
     int popcount() {
         int count = 0;
-        unsigned int v = bitVector;
-        while( v ) {
-            v &= v - 1;
-            ++count;
+        for( int i = 0; i < size_; ++i ) {
+            unsigned int v = bitVector[i];
+            while( v ) {
+                v &= v - 1;
+                ++count;
+            }
         }
         return count;
     }
     bool operator < ( const BitVector & other ) const {
-        return bitVector < other.bitVector ;
+        for( int i = 0; i < min( size_, other.size_); ++i ) {
+                if( bitVector[i] == other.bitVector[i] )
+                    continue;
+                return bitVector[i] < other.bitVector[i];
+        }
+        return false;
     }
 };
 
 class BitVectorTest {
 public:
     static void runTest() {
-        int numberOfBits = 30;
+        bitVectorTest( sizeof( unsigned int ) * 8 - 2 );
+        bitVectorTest( sizeof( unsigned int ) * 8 );
+        bitVectorTest( sizeof( unsigned int ) * 42 + 42 );
+    }
+private:
+    static void bitVectorTest( int numberOfBits ) {
         BitVector v( numberOfBits );
 
         for( int i = 0; i < numberOfBits; ++i ) {

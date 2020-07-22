@@ -1,16 +1,9 @@
-#include <vector>
-#include <set>
-#include <map>
-#include <queue>
-#include <iostream>
-#include <stdio.h>
-using namespace std;
+#ifndef __GRAPH_H__
+#define __GRAPH_H__
 
-typedef pair<int,int> ii;
+#include "common.h"
 
-namespace Graph {
-
-class graph {
+class Graph {
 public:
     struct Edge {
         int v;
@@ -28,13 +21,13 @@ public:
     bool directed;
 
 public:
-    graph( int nvertices, bool directed );
+    Graph( int nvertices, bool directed );
 
     bool addEdge( int u, int v, int weight, int label );
     bool addEdges( const vector< ii > &edges );
     bool isDirected() { return directed; }
 
-    ~graph() {}
+    ~Graph() {}
 
 public:
     //public utility functions.
@@ -47,13 +40,13 @@ private:
     }
 };
 
-graph::graph( int nvertices, bool directed ) :
+Graph::Graph( int nvertices, bool directed ) :
        nvertices( nvertices ), directed( directed ) {
            assert( nvertices > 0 );
            adjList.resize( nvertices );
 }
 
-bool graph::addEdge( int u, int v, int weight = 1, int label = 0 ) {
+bool Graph::addEdge( int u, int v, int weight = 1, int label = 0 ) {
     if( !isVertexWithinRange( u ) || !isVertexWithinRange( v ) )
         return false;
     Edge edge( v, weight, label );
@@ -66,12 +59,12 @@ bool graph::addEdge( int u, int v, int weight = 1, int label = 0 ) {
     return true;
 }
 
-bool graph::addEdges( const vector<ii> &edges ) {
+bool Graph::addEdges( const vector<ii> &edges ) {
     for( const ii& edge : edges )
         addEdge( edge.first, edge.second );
 }
 
-void graph::printGraph() {
+void Graph::printGraph() {
     printf( "Graph@%p Vertices=%3d Edges=%3d Directed=%s\n",
             this, nvertices, nedges, directed ? "True" : "False" );
     for( int i = 0; i < nvertices; ++i ) {
@@ -83,15 +76,17 @@ void graph::printGraph() {
     }
 }
 
-class graphTest {
+class GraphTest {
 public:
-    static void run() {
+    static void runTest() {
         snakeAndLadderTest();
+        graphColorWalkTest();
+        graphDivisiblePathTest();
     }
-
-    static int graphDivisiblePath( graph& g, int startVertex,
-                                    int endVertex, int pathLenDiv,
-                                    vector<int> &path ) {
+private:
+    static int graphDivisiblePath( Graph& g, int startVertex,
+                                   int endVertex, int pathLenDiv,
+                                   vector<int> &path ) {
         assert( pathLenDiv > 0 );
         assert( path.size() == 0 );
 
@@ -133,8 +128,8 @@ public:
         }
         return path.size() - 1;
     }
-    static int graphColorWalk( graph &g, int startVertex, int endVertex,
-                                vector< ii > &path ) {
+    static int graphColorWalk( Graph &g, int startVertex, int endVertex,
+                               vector< ii > &path ) {
         assert( path.size() == 0 );
         pair< ii, int > startState( ii( -1, -1 ), startVertex ),
                         curState;
@@ -175,8 +170,8 @@ public:
         }
         return path.size() - 1;
     }
-    static bool graphDivisiblePathTest() {
-        graph g( 6, true );
+    static void graphDivisiblePathTest() {
+        Graph g( 6, true );
         vector<ii> edges { {0,1}, {1,2}, {1,4}, {3,2}, {4,3}, {4,5}, {5,0} };
         string vertexLabels = "swtzyx";
         g.addEdges( edges );
@@ -186,9 +181,10 @@ public:
         for( int i = path.size() - 1; i >= 0; --i )
             printf( "%c%s", vertexLabels[ path[i] ],
                     ( i > 0 ) ? " --> " : "" );
+        printf( "\n" );
     }
-    static bool graphColorWalkTest() {
-        graph g( 6, true );
+    static void graphColorWalkTest() {
+        Graph g( 6, true );
         const int weight = 1, red = 0, blue = 1;
         vector< ii > edges = { {0,1}, {1,2}, {2,3}, {3,4}, {4,5}, {5,0},
                                {2,4}, {3,1}, {4,0}, {5,1} };
@@ -207,10 +203,11 @@ public:
                     ( i > 0 ) ? ( path[i - 1].second == red ? "(red)" : "(blue)" )
                               : "" ,
                     ( i > 0 ) ? " --> " : "" );
+        printf( "\n" );
     }
     static int snakeAndLadder( int target, int k, map< int, int> &ladders,
-                        map< int, int > &snakes,
-                        vector< int > &moves ) {
+                               map< int, int > &snakes,
+                               vector< int > &moves ) {
         assert( k > 0 && k <=6 );
         assert( target >= 64 && target <= 100 );
 
@@ -265,7 +262,7 @@ public:
         map< int, int > snakes = { {27,17}, {67,10}, {79,40}, {95,71}, {98,6} };
         vector< int > moves;
 
-        for( int k = 1; k <=6; ++k ) {
+        for( int k = 2; k <=6; ++k ) {
             printf( "With %d steps, the board is solvable in %d moves.\n",
                     k, snakeAndLadder( N, k, ladders, snakes, moves ) );
             for( int m = moves.size() - 1; m >=0 ; --m ) {
@@ -280,4 +277,4 @@ public:
     }
 };
 
-}
+#endif // __GRAPH_H__

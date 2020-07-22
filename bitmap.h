@@ -851,10 +851,10 @@ private:
 class BitmapTest {
 public:
     static void runTest() {
-        //basicBitmapClassTest();
-        //blackenConnectedComponentTest();
-        //solidBlockComputationTest();
-        //guillotineDivisionTest();
+        basicBitmapClassTest();
+        blackenConnectedComponentTest();
+        solidBlockComputationTest();
+        guillotineDivisionTest();
         bitmapQuadrantDivisionTest();
     }
 private:
