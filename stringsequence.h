@@ -5,6 +5,25 @@
 
 class StringSequence {
 public:
+    static string longestCommonSubstring( const string& a, const string& b ) {
+        int substrLen = 0, bestEndIndex;
+        string lcs;
+
+        int M = a.size(), N = b.size();
+        vector< vector< int > > lcsMatrix( M + 1, vector< int > ( N + 1, 0 ) );
+        for( int i = 1; i <= M; ++i ) {
+            for( int j = 1; j <= N; ++j ) {
+                lcsMatrix[i][j] = ( a[i-1] == b[j-1] ) ? 1 + lcsMatrix[i-1][j-1] : 0;
+                if( substrLen < lcsMatrix[i][j] ) {
+                    substrLen = lcsMatrix[i][j];
+                    bestEndIndex = i;
+                }
+            }
+        }
+        if( substrLen > 0 )
+            lcs = a.substr( bestEndIndex - substrLen, substrLen );
+        return lcs;
+    }
     static string longestCommonSubsequence( const string& a, const string& b ) {
         int M = a.size(), N = b.size();
         string lcs;
@@ -163,13 +182,35 @@ public:
         //isSubsequenceTest();
         //isShuffleTest();
         //longestContiguousForwardsBackwardsSubstringTest();
-        isSmoothShuffleTest();
-        //longestCommonSubsequenceTest();
-        //shortestCommonSupersequenceTest();
+        //isSmoothShuffleTest();
+        longestCommonSubsequenceTest();
+        shortestCommonSupersequenceTest();
+        longestCommonSubstringTest();
     }
 private:
+    typedef vector< tuple< string, string, string > > StringTestcaseList;
+    typedef function< string( const string&, const string& ) > StringFunction;
+    typedef function< void( const string&, const string&, const string& ) > StringFunctionVerify;
+
+    static void longestCommonSubstringTest() {
+        StringTestcaseList testcases = {
+            { "", "", "" },
+            { "DYNAMICPROGRAMMING", "", "" },
+            { "", "DYNAMICPROGRAMMING", "" },
+            { "DYNAMICPROGRAMMING", "DYNAMICPROGRAMMING", "DYNAMICPROGRAMMING" },
+            { "DYNAMICPROGRAMMING", "DYNAMIC", "DYNAMIC" },
+            { "DYNAMICPROGRAMMING", "PROGRAMMING", "PROGRAMMING" },
+            { "DYNAMICPROGRAMMING", "ABMICPROBB", "MICPRO" },
+            { "DYNAMICPROGRAMMING", "ABMICPROBBDYNAMICCC", "DYNAMIC" },
+        };
+        printf( "Longest common Substring Test\n" );
+        function verificationFunc =
+                 []( const string& a, const string& b, const string& result ) {
+                 };
+        generic_test( testcases, StringSequence::longestCommonSubstring, verificationFunc );
+    }
     static void longestCommonSubsequenceTest() {
-        vector< tuple< string, string, string > > testcases = {
+        StringTestcaseList testcases = {
             { "DYNAMICPROGRAMMING", "DYNAMICPROGRAMMING", "DYNAMICPROGRAMMING" },
             { "DYNAMICPROGRAMMING", "", "" },
             { "", "DYNAMICPROGRAMMING", "" },
@@ -178,46 +219,45 @@ private:
             { "PINEAPPLE", "PINE", "PINE" },
             { "PINEAPPLE", "APPLECART", "APPLE" },
         };
-        LCS_SCS_common_test( testcases, "LongestCommonSubsequence" );
+        printf( "Longest Common Subsequence Test\n" );
+        function verificationFunc =
+                 []( const string& a, const string& b, const string& result ) {
+                     assert( StringSequence::isSubsequence( a, result ) );
+                     assert( StringSequence::isSubsequence( b, result ) );
+                 };
+        generic_test( testcases, StringSequence::longestCommonSubsequence, verificationFunc );
     }
     static void shortestCommonSupersequenceTest() {
-        vector< tuple< string, string, string > > testcases = {
+        StringTestcaseList testcases = {
             { "DYNAMICPROGRAMMING", "DYNAMICPROGRAMMING", "DYNAMICPROGRAMMING" },
             { "DYNAMICPROGRAMMING", "", "DYNAMICPROGRAMMING" },
             { "", "DYNAMICPROGRAMMING", "DYNAMICPROGRAMMING" },
             { "", "", "" },
             { "EATAPPLEFRUIT", "EATORANGEFRUIT", "EATORAPPLNGEFRUIT" },
         };
-        LCS_SCS_common_test( testcases, "ShortestCommonSupersequence" );
+        printf( "Shortest Common Supersequence Test\n" );
+        function verificationFunc =
+                 []( const string& a, const string &b, const string &result ) {
+                     assert( StringSequence::isSubsequence( result, a ) );
+                     assert( StringSequence::isSubsequence( result, b ) );
+                 };
+        generic_test( testcases, StringSequence::shortestCommonSupersequence, verificationFunc );
     }
-    static void LCS_SCS_common_test( vector< tuple< string, string, string > > &testcases,
-                                const string& testTag ) {
+    static void generic_test( StringTestcaseList & testcases, StringFunction implFunc,
+                              StringFunctionVerify verificationFunc ) {
         for( auto testcase : testcases ) {
             const string& a = get< 0 > ( testcase );
             const string& b = get< 1 > ( testcase );
             const string& expectedResult = get< 2 > ( testcase );
 
-            string result;
-            if( testTag == "LongestCommonSubsequence" )
-                result = StringSequence::longestCommonSubsequence( a, b );
-            else if( testTag == "ShortestCommonSupersequence" )
-                result = StringSequence::shortestCommonSupersequence( a, b );
-            else assert( false );
-
-            printf( "[%s] [%s] %s = [%s] length = %d\n", a.c_str(), b.c_str(), testTag.c_str(),
-                    result.c_str(), result.size() );
+            string result = implFunc( a, b );
+             printf( "[%s] [%s] = [%s] length = %d\n", a.c_str(), b.c_str(), result.c_str(),
+                     result.size() );
             assert( result.size() == expectedResult.size() );
 
-            if( testTag == "LongestCommonSubsequence" ) {
-                assert( StringSequence::isSubsequence( a, result ) );
-                assert( StringSequence::isSubsequence( b, result ) );
-            } else if( testTag == "ShortestCommonSupersequence" ) {
-                assert( StringSequence::isSubsequence( result, a ) );
-                assert( StringSequence::isSubsequence( result, b ) );
-            } else assert( false );
+            verificationFunc( a, b, result );
         }
     }
-
     static void longestContiguousForwardsBackwardsSubstringTest() {
         vector< tuple< string, int > > testcases = {
             { "DYNAMICPROGRAMMINGMANYTIMES", 4 },

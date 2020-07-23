@@ -16,6 +16,7 @@
 #include <type_traits>
 #include <iostream>
 #include <tuple>
+#include <functional>
 #include <ctime>
 
 #include "stdio.h"
