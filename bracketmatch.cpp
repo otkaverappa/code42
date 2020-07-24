@@ -1,9 +1,13 @@
 #include "bracketmatch.h"
+#include "stringsequence.h"
 
 bool BracketMatch::isBalanced( const string& str ) {
+    int N = str.size();
+    if( N & 0x1 )
+        return false;
+
     stack< char > s;
     s.push( '*' );
-    int N = str.size();
 
     for( int i = 0; i < N; ++i ) {
         char ch = str[i];
@@ -19,6 +23,55 @@ bool BracketMatch::isBalanced( const string& str ) {
     }
     s.pop();
     return s.empty();
+}
+
+bool BracketMatch::balancedComponent( const string& str, int startIndex,
+                                      int endIndex, int& len ) {
+    if( startIndex >= endIndex || ( ( endIndex - startIndex ) & 0x1 ) == 0 )
+        return false;
+    int len_ = 0;
+
+    stack< char > s;
+    for( int i = startIndex; i <= endIndex; ++i ) {
+        char ch = str[i];
+        if( isOpenBracket( ch ) ) {
+            s.push( matchingCloseSymbol[ ch ] );
+        } else if( isCloseBracket( ch ) ) {
+            if( s.empty() || s.top() != ch )
+                return false;
+            s.pop();
+        }
+        ++len_;
+        if( s.empty() ) {
+            len = len_;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool BracketMatch::isBalancedPalindrome( const string& str ) {
+    int N = str.size();
+    if( N == 0 )
+        return true;
+    int startIndex = 0, endIndex = N-1;
+    int len;
+    while( balancedComponent( str, startIndex, endIndex, len ) ) {
+        int curLen = endIndex - startIndex + 1;
+        if( len == curLen )
+            return true;
+        else if( len + len > curLen )
+            return false;
+
+        string balancedComp = str.substr( startIndex, len );
+        if( !StringSequence::isSubarray( str, balancedComp, endIndex - len + 1 ) )
+            return false;
+        if( len + len == curLen )
+            return  true;
+        startIndex += len;
+        endIndex -= len;
+    }
+    return false;
 }
 
 string BracketMatch::longestBalancedSubarray( const string& str ) {
@@ -66,6 +119,26 @@ void BracketMatchTest::isBalancedTest() {
         bool isBalanced = BracketMatch::isBalanced( str );
         printf( "%-32s %s\n", str.c_str(), isBalanced ? "True" : "False" );
         assert( isBalanced == result );
+    }
+}
+
+void BracketMatchTest::isBalancedPalindromeTest() {
+    vector< pair< string, bool > > testcases = {
+        { "", true }, { "[]", true }, { "()", true },
+        { "[][][][]", true }, { "()()()()", true },
+        { "([][]())[]", false }, { "(((()))[[][]]", false, },
+        { "(((([]))))[[[]]]", false },
+        { "(((([]))))[[[]]](((([]))))", true },
+        { "([)]", false },
+        { "([()][]())[()()]()", false },
+        { "[[[(([]))]]]", true },
+        { "()[]()[[[[([])]]]]()[]()", true },
+    };
+    printf( "IsBalancedPalindrome ?\n" );
+    for( const auto & [ str, result ] : testcases ) {
+        bool isBalancedPalindrome = BracketMatch::isBalancedPalindrome( str );
+        printf( "%-32s %s\n", str.c_str(), isBalancedPalindrome ? "True" : "False" );
+        assert( isBalancedPalindrome == result );
     }
 }
 

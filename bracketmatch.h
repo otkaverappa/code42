@@ -6,7 +6,17 @@
 class BracketMatch {
 public:
     static bool isBalanced( const string& str );
+    static bool isBalancedPalindrome( const string& str );
+
     static string longestBalancedSubarray( const string& str );
+    static string longestBalancedSubsequence( const string& str );
+    static string longestPalindromicBalancedSubarray( const string& str );
+    static string longestPalindromicBalancedSubsequence( const string& str );
+
+    static string longestCommonBalancedSubarray( const string& a, const string& b );
+    static string longestCommonBalancedSubsequence( const string& a, const string& b );
+    static string longestCommonPalindromicBalancedSubarray( const string& a, const string& b );
+    static string longestCommonPalindromicBalancedSubsequence( const string& a, const string& b );
 
 private:
     enum {
@@ -37,17 +47,21 @@ private:
     static bool isCloseBracket( char ch ) {
         return matchingOpenSymbol.find( ch ) != matchingOpenSymbol.end();
     }
+    static bool balancedComponent( const string& str, int startIndex, int endIndex,
+                                   int& len );
 };
 
 class BracketMatchTest {
 public:
     static void runTest() {
         isBalancedTest();
+        isBalancedPalindromeTest();
         longestBalancedSubarrayTest();
     }
 
 private:
     static void isBalancedTest();
+    static void isBalancedPalindromeTest();
     static void longestBalancedSubarrayTest();
 };
 
