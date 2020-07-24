@@ -3,9 +3,10 @@
 
 #include "common.h"
 
+template <typename T>
 class Multivector {
 private:
-    vector< int > v;
+    vector< T > v;
     vector< int > dimVector;
 
     bool isIndexWithinBounds( const vector< int > & dim,
@@ -21,7 +22,7 @@ private:
         return true;
     }
 public:
-    Multivector( initializer_list< int > dim, int initialValue=INT_MAX ) {
+    Multivector( initializer_list< int > dim, T initialValue=T() ) {
         int total = 1;
         for( auto d : dim ) {
             assert( d > 0 );
@@ -31,7 +32,7 @@ public:
         v.resize( total, initialValue );
     }
 
-    bool get( const vector< int > & dim, int & data ) {
+    bool get( const vector< int > & dim, T & data ) {
         int index;
         if( isIndexWithinBounds( dim, &index ) ) {
                 data = v[index];
@@ -40,7 +41,7 @@ public:
         return false;
     }
 
-    bool set( const vector< int > & dim, int data ) {
+    bool set( const vector< int > & dim, T data ) {
         int index;
         if( isIndexWithinBounds( dim, &index ) ) {
             v[index] = data;
@@ -61,7 +62,7 @@ public:
         int initValue, testValue;
 
         initValue = 0; testValue = 42;
-        Multivector vec( { M }, initValue );
+        Multivector< int > vec( { M }, initValue );
         assert( vec.size() == M );
         for( int i = 0; i < M; ++i ) {
             int element;
@@ -71,7 +72,7 @@ public:
         }
 
         initValue = 0xFF; testValue = 1;
-        Multivector matrix( { M, N }, initValue );
+        Multivector< int > matrix( { M, N }, initValue );
         assert( matrix.size() == M * N );
         for( int i = 0; i < M; ++i ) {
             for( int j = 0; j < N; ++j ) {
@@ -83,7 +84,7 @@ public:
         }
 
         initValue = 0xABCD; testValue = ~initValue;
-        Multivector tensor ( { M, N, U, V }, initValue );
+        Multivector< int > tensor ( { M, N, U, V }, initValue );
         assert( tensor.size() == M * N * U * V );
         for( int i = 0; i < M; ++i ) {
             for( int j = 0; j < N; ++j ) {

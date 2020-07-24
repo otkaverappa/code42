@@ -2,6 +2,7 @@
 #define __STRINGSEQUENCE_H__
 
 #include "common.h"
+#include "multivector.h"
 
 class StringSequence {
 public:
@@ -100,7 +101,81 @@ string StringSequence::longestCommonSubsequence( const string& a, const string& 
 }
 
 string StringSequence::longestCommonPalindromicSubsequence( const string& a, const string& b ) {
-    return "AAA";
+    enum { INCREMENT_LEFT_A = 0, DECREMENT_RIGHT_A = 1,
+           INCREMENT_LEFT_B = 2, DECREMENT_RIGHT_B = 3,
+           INC_DEC_BOTH = 4 };
+    int M = a.size(), N = b.size();
+    string left, right;
+    if( M == 0 || N == 0 ) return left;
+    Multivector< int > cache( { M, M, N, N }, 0 );
+    Multivector< int > pos( { M, M, N, N }, 0 );
+
+    for( int d1 = 0; d1 < M; ++d1 ) {
+        for( int i = 0; i < M - d1; ++i ) {
+            int j = i + d1;
+            for( int d2 = 0; d2 < N; ++d2 ) {
+                for( int u = 0; u < N - d2; ++u ) {
+                    int v = u + d2;
+
+                    int optVal, optMove;
+                    if( i == j && u == v ) {
+                        optVal = ( a[i] == b[u] ) ? 1 : 0;
+                        optMove = ( optVal == 1 ) ? INC_DEC_BOTH : INCREMENT_LEFT_A;
+                    }
+                    else if( i == j ) {
+                        int A, B;
+                        cache.get( { i, j, u+1, v }, A );
+                        cache.get( { i, j, u, v-1 }, B );
+                        optVal = max( A, B );
+                        optMove = optVal == A ? INCREMENT_LEFT_B : DECREMENT_RIGHT_B;
+                    }
+                    else if( u == v ) {
+                        int A, B;
+                        cache.get( { i+1, j, u, v }, A );
+                        cache.get( { i, j-1, u, v }, B );
+                        optVal = max( A, B );
+                        optMove = optVal == A ? INCREMENT_LEFT_A : DECREMENT_RIGHT_A;
+                    }
+                    else if( a[i] == a[j] && b[u] == b[v] && a[i] == b[u] ) {
+                        int len;
+                        cache.get( { i+1, j-1, u+1, v-1 }, len );
+                        optVal = 2 + len;
+                        optMove = INC_DEC_BOTH;
+                    } else {
+                        int A, B, C, D;
+                        cache.get( { i+1, j, u, v }, A );
+                        cache.get( { i, j-1, u, v }, B );
+                        cache.get( { i, j, u+1, v }, C );
+                        cache.get( { i, j, u, v-1 }, D );
+                        optVal = max( max( A, B ), max( C, D ) );
+                        optMove = optVal == A ? INCREMENT_LEFT_A : (
+                                  optVal == B ? DECREMENT_RIGHT_A : (
+                                  optVal == C ? INCREMENT_LEFT_B : DECREMENT_RIGHT_B ) );
+                    }
+                    cache.set( { i, j, u, v }, optVal );
+                    pos.set( { i, j, u, v }, optMove );
+                }
+            }
+        }
+    }
+    int i = 0, j = M-1, u = 0, v = N-1;
+    while( i <= M-1 && j >= 0 && u <= N-1 && v >= 0 ) {
+        int optMove;
+        pos.get( { i, j, u, v }, optMove );
+        switch( optMove ) {
+            case INCREMENT_LEFT_A: ++i; break;
+            case INCREMENT_LEFT_B: ++u; break;
+            case DECREMENT_RIGHT_A: --j; break;
+            case DECREMENT_RIGHT_B: --v; break;
+            case INC_DEC_BOTH:
+                left += a[i];
+                if( j != i ) right += a[j];
+                ++i; --j; ++u; --v; break;
+            default: assert( false );
+        }
+    }
+    reverse( right.begin(), right.end() );
+    return left + right;
 }
 
 string StringSequence::shortestCommonSupersequence( const string& a, const string& b ) {
@@ -208,13 +283,13 @@ int StringSequence::longestContiguousForwardsBackwardsSubstring( const string& s
 class StringSequenceTest {
 public:
     static void runTest() {
-        //isSubsequenceTest();
-        //isShuffleTest();
-        //longestContiguousForwardsBackwardsSubstringTest();
+        isSubsequenceTest();
+        isShuffleTest();
+        longestContiguousForwardsBackwardsSubstringTest();
         //isSmoothShuffleTest();
-        //longestCommonSubsequenceTest();
-        //shortestCommonSupersequenceTest();
-        //longestCommonSubstringTest();
+        longestCommonSubsequenceTest();
+        shortestCommonSupersequenceTest();
+        longestCommonSubstringTest();
         longestCommonPalindromicSubsequenceTest();
     }
 private:
@@ -224,7 +299,13 @@ private:
 
     static void longestCommonPalindromicSubsequenceTest() {
         StringTestcaseList testcases = {
-            { "AAA", "AAA", "AAA" },
+            { "", "", "" },
+            { "RACECAR", "", "" },
+            { "", "RACECAR", "" },
+            { "RACECAR", "RACECAR", "RACECAR" },
+            { "RACECAR", "MALAYALAMRACECARLION", "RACECAR" },
+            { "MALAYALAMRACECARLION", "RACECAR", "RACECAR" },
+            { "RACECAR", "MALAYALAM", "AA" },
         };
         printf( "Longest Common Palindromic Subsequence Test\n" );
         function verificationFunc =
