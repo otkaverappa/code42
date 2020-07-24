@@ -11,6 +11,9 @@ public:
 
     static string longestCommonSubsequence( const string& a, const string& b );
 
+    static string longestCommonSubsequence_3( const string& a, const string& b,
+                                              const string& c );
+
     static string shortestCommonSupersequence( const string& a, const string& b );
 
     //Is string "c" a shuffle of strings "a" and "b" ?
@@ -60,6 +63,7 @@ public:
         longestContiguousForwardsBackwardsSubstringTest();
         //isSmoothShuffleTest();
         longestCommonSubsequenceTest();
+        longestCommonSubsequence_3Test();
         shortestCommonSupersequenceTest();
         longestCommonSubstringTest();
         longestCommonPalindromicSubsequenceTest();
@@ -72,6 +76,7 @@ private:
     static void longestCommonPalindromicSubsequenceTest();
     static void longestCommonSubstringTest();
     static void longestCommonSubsequenceTest();
+    static void longestCommonSubsequence_3Test();
     static void shortestCommonSupersequenceTest();
     static void generic_test( StringTestcaseList & testcases, StringFunction implFunc,
                               StringFunctionVerify verificationFunc );

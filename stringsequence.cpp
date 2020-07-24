@@ -21,6 +21,54 @@ string StringSequence::longestCommonSubstring( const string& a, const string& b 
     return lcs;
 }
 
+string StringSequence::longestCommonSubsequence_3( const string& a, const string& b,
+                                                   const string& c ) {
+    int M = a.size(), N = b.size(), P = c.size();
+    string lcs;
+    Multivector< int > lcsMatrix( { M+1, N+1, P+1 }, 0 );
+    for( int i = 1; i <= M; ++i ) {
+        for( int j = 1; j <= N; ++j ) {
+            for( int k = 1; k <= P; ++k ) {
+                int optVal;
+                if( a[i-1] == b[j-1] && b[j-1] == c[k-1] ) {
+                    lcsMatrix.get( { i-1, j-1, k-1 }, optVal );
+                    ++optVal;
+                } else {
+                    int A, B, C;
+                    lcsMatrix.get( { i-1, j, k }, A );
+                    lcsMatrix.get( { i, j-1, k }, B );
+                    lcsMatrix.get( { i, j, k-1 }, C );
+                    optVal = max( max( A, B ), C );
+                }
+                lcsMatrix.set( { i, j, k }, optVal );
+            }
+        }
+    }
+    int i = M, j = N, k = P;
+    int optVal;
+    lcsMatrix.get( { i, j, k }, optVal );
+    while( i > 0 && j > 0 && k > 0 ) {
+        int A, B, C, D;
+        lcsMatrix.get( { i-1, j, k }, A );
+        lcsMatrix.get( { i, j-1, k }, B );
+        lcsMatrix.get( { i, j, k-1 }, C );
+        lcsMatrix.get( { i-1, j-1, k-1 }, D );
+        if( optVal == D + 1 ) {
+            lcs += a[i-1];
+            --i; --j; --k;
+            optVal = D;
+        }
+        else if( optVal == A )
+            --i;
+        else if( optVal == B )
+            --j;
+        else if( optVal == C )
+            --k;
+    }
+    reverse( lcs.begin(), lcs.end() );
+    return lcs;
+}
+
 string StringSequence::longestCommonSubsequence( const string& a, const string& b ) {
     int M = a.size(), N = b.size();
     string lcs;
@@ -286,6 +334,34 @@ void StringSequenceTest::longestCommonSubsequenceTest() {
     generic_test( testcases, StringSequence::longestCommonSubsequence, verificationFunc );
 }
 
+void StringSequenceTest::longestCommonSubsequence_3Test() {
+    vector< tuple< string, string, string, string > > testcases = {
+        { "", "", "", "" },
+        { "APPLE", "", "", "" },
+        { "", "APPLE", "", "" },
+        { "", "", "APPLE", "" },
+        { "APPLE", "APPLEORANGE", "APPLEPINE", "APPLE" },
+        { "REDAPPLE", "GREENAPPLE", "NOAPPLE", "APPLE" },
+        { "XXRXAXCXEXCXAXRXX", "YYRYAYCYEYCYAYRYY", "ZZRZAZCZEZCZAZRZZ", "RACECAR" },
+    };
+    printf( "Longest Common Subsequence (3 strings) Test\n" );
+    for( auto testcase : testcases ) {
+        const string& a = get< 0 > ( testcase );
+        const string& b = get< 1 > ( testcase );
+        const string& c = get< 2 > ( testcase );
+        const string& expectedResult = get< 3 > ( testcase );
+
+        string result = StringSequence::longestCommonSubsequence_3( a, b, c );
+        printf( "[%s] [%s] [%s] = [%s] length = %d\n", a.c_str(), b.c_str(), c.c_str(),
+                result.c_str(), result.size() );
+        assert( result.size() == expectedResult.size() );
+
+        assert( StringSequence::isSubsequence( a, result ) );
+        assert( StringSequence::isSubsequence( b, result ) );
+        assert( StringSequence::isSubsequence( c, result ) );
+    }
+}
+
 void StringSequenceTest::shortestCommonSupersequenceTest() {
     StringTestcaseList testcases = {
         { "DYNAMICPROGRAMMING", "DYNAMICPROGRAMMING", "DYNAMICPROGRAMMING" },
@@ -311,8 +387,8 @@ void StringSequenceTest::generic_test( StringTestcaseList & testcases, StringFun
         const string& expectedResult = get< 2 > ( testcase );
 
         string result = implFunc( a, b );
-         printf( "[%s] [%s] = [%s] length = %d\n", a.c_str(), b.c_str(), result.c_str(),
-                 result.size() );
+        printf( "[%s] [%s] = [%s] length = %d\n", a.c_str(), b.c_str(), result.c_str(),
+                result.size() );
         assert( result.size() == expectedResult.size() );
 
         verificationFunc( a, b, result );
