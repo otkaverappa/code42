@@ -4,6 +4,10 @@
 #include "common.h"
 
 class BracketMatch {
+public:
+    static bool isBalanced( const string& str );
+    static string longestBalancedSubarray( const string& str );
+
 private:
     enum {
         OPEN_SQUARE_BRACKET  = '[',
@@ -15,59 +19,36 @@ private:
         OPEN_ANGLE_BRACKET   = '<',
         CLOSE_ANGLE_BRACKET  = '>'
     };
-    static inline map< char, char > matchingSymbol = {
+    static inline unordered_map< char, char > matchingCloseSymbol = {
         { OPEN_SQUARE_BRACKET, CLOSE_SQUARE_BRACKET },
         { OPEN_ROUND_BRACKET,  CLOSE_ROUND_BRACKET },
     };
-public:
-    static bool isBalanced( const string& str ) {
-        stack< char > s;
-        s.push( '*' );
-        int N = str.size();
-
-        for( int i = 0; i < N; ++i ) {
-            char ch;
-            switch( ch = str[i] ) {
-            case OPEN_SQUARE_BRACKET:
-            case OPEN_ROUND_BRACKET:
-                s.push( matchingSymbol[ ch ] ); break;
-            case CLOSE_SQUARE_BRACKET:
-            case CLOSE_ROUND_BRACKET:
-                if( s.top() != ch )
-                    return false;
-                s.pop();
-                break;
-            default:
-                return false;
-            }
-        }
-        s.pop();
-        return s.empty();
+     static inline unordered_map< char, char > matchingOpenSymbol = {
+        { CLOSE_SQUARE_BRACKET, OPEN_SQUARE_BRACKET },
+        { CLOSE_ROUND_BRACKET, OPEN_ROUND_BRACKET },
+    };
+    static inline unordered_set< char > allBrackets = {
+        OPEN_SQUARE_BRACKET, OPEN_CURLY_BRACKET, OPEN_ROUND_BRACKET, OPEN_ANGLE_BRACKET,
+        CLOSE_SQUARE_BRACKET, CLOSE_CURLY_BRACKET, CLOSE_ROUND_BRACKET, CLOSE_ANGLE_BRACKET,
+    };
+    static bool isOpenBracket( char ch ) {
+        return matchingCloseSymbol.find( ch ) != matchingCloseSymbol.end() ;
     }
-    static int longestBalancedSubarray( const string& str ) {
+    static bool isCloseBracket( char ch ) {
+        return matchingOpenSymbol.find( ch ) != matchingOpenSymbol.end();
     }
-private:
-
 };
 
 class BracketMatchTest {
 public:
     static void runTest() {
         isBalancedTest();
+        longestBalancedSubarrayTest();
     }
+
 private:
-    static void isBalancedTest() {
-        vector< pair< string, bool > > testcases = {
-            { "[]", true }, { "()", true }, { "([][]())[]", true },
-            { "(((()))[[][]]", false, }, { "(((([]))))[[[]]]", true }, { "([)]", false },
-            { "([()][]())[()()]()", true }, { "(([]))]", false },
-        };
-        for( const auto & [ str, result ] : testcases ) {
-            bool isBalanced = BracketMatch::isBalanced( str );
-            printf( "%-32s %s\n", str.c_str(), isBalanced ? "True" : "False" );
-            assert( isBalanced == result );
-        }
-    }
+    static void isBalancedTest();
+    static void longestBalancedSubarrayTest();
 };
 
 #endif //__BRACKET_MATCH_H__
