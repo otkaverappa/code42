@@ -257,6 +257,16 @@ bool StringSequence::isSmoothShuffle( const string& a, const string& b, const st
     if( tag[ K ] == SHUFFLE_MATCH_NONE ) return false;
 }
 
+bool StringSequence::isSubarray( const string& a, const string& b, int index ) {
+    if( index < 0 || a.size() - index < b.size() )
+        return false;
+    for( int i = 0; i < b.size(); ++i ) {
+        if( a[index + i] != b[i] )
+            return false;
+    }
+    return true;
+}
+
 bool StringSequence::isSubsequence( const string& a, const string& b ) {
     int M = a.size(), N = b.size();
     if( N > M ) return false;
@@ -432,6 +442,30 @@ void StringSequenceTest::isSubsequenceTest() {
         bool isSubsequence = StringSequence::isSubsequence( a, b );
         printf( "[%s] [%s] isSubsequence: %s\n", a.c_str(), b.c_str(), isSubsequence ? "True" : "False" );
         assert( expectedResult == isSubsequence );
+    }
+}
+
+void StringSequenceTest::isSubarrayTest() {
+    vector< tuple< string, string, int, bool > > testcases = {
+        { "PINEAPPLE", "PINE", 0, true },
+        { "PINEAPPLE", "PINE", 1, false },
+        { "PINEAPPLE", "PINE", 10, false },
+        { "PINEAPPLE", "", 0, true },
+        { "PINEAPPLE", "APPLE", 4, true },
+        { "PINEAPPLE", "PINEAPPLE", 0, true },
+        { "PINEAPPLE", "PINEAPPLE", 1, false },
+        { "PINEAPPLE", "PINEAPPLES", 0, false },
+    };
+    for( auto testcase : testcases ) {
+        const string& a = get< 0 > ( testcase );
+        const string& b = get< 1 > ( testcase );
+        int index = get< 2 > ( testcase );
+        bool expectedResult = get< 3 > ( testcase );
+
+        bool isSubarray = StringSequence::isSubarray( a, b, index );
+        printf( "[%s] [%s] [from %d] isSubarray: %s\n", a.c_str(), b.c_str(), index,
+                isSubarray ? "True" : "False" );
+        assert( expectedResult == isSubarray );
     }
 }
 

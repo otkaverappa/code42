@@ -27,6 +27,9 @@ public:
     //Is string "b" a subsequence of string "a" ?
     static bool isSubsequence( const string& a, const string& b );
 
+    //Is string "b" a subarray of string "a", starting at index "i" ?
+    static bool isSubarray( const string& a, const string& b, int index );
+
     static int longestContiguousForwardsBackwardsSubstring( const string& s );
 
     //Longest Common Palindromic Subsequence between "a" and "b".
@@ -58,6 +61,7 @@ private:
 class StringSequenceTest {
 public:
     static void runTest() {
+        isSubarrayTest();
         isSubsequenceTest();
         isShuffleTest();
         longestContiguousForwardsBackwardsSubstringTest();
@@ -81,6 +85,7 @@ private:
     static void generic_test( StringTestcaseList & testcases, StringFunction implFunc,
                               StringFunctionVerify verificationFunc );
     static void longestContiguousForwardsBackwardsSubstringTest();
+    static void isSubarrayTest();
     static void isSubsequenceTest();
     static void isShuffleTest();
     static void isSmoothShuffleTest();
