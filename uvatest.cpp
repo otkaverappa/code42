@@ -12,7 +12,7 @@ void UVA_11995::runTest() {
      };
 
     for( auto & [ inputVec, expectedResult ] : testcases ) {
-        string result = UVA_11995::processInputSequence( inputVec );
+        string result = UVA_11995::containerType( inputVec );
         if( result != expectedResult ) {
             printf( "Expected [%s] Obtained [%s]\n", expectedResult.c_str(), result.c_str() );
             assert( false );
@@ -20,6 +20,34 @@ void UVA_11995::runTest() {
     }
 }
 
+void UVA_10158::runTest() {
+}
+
+void UVA_12049::runTest() {
+}
+
+void UVA_978::runTest() {
+}
+
+void UVA_599::runTest() {
+    vector< int > vertices = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N' };
+    vector< ii > edges = {
+        { 'A', 'B' }, { 'B', 'C' }, { 'B', 'D' }, { 'D', 'E' }, { 'E', 'F' }, { 'B', 'G' },
+        { 'G', 'H' }, { 'G', 'I' }, { 'J', 'K' }, { 'K', 'L' }, { 'K', 'M' },
+    };
+    ii result = UVA_599::numberOfTreesAndAcorns( edges, vertices );
+    printf( "Trees = %d Acorns = %d\n", result.first, result.second );
+
+    vertices = { 'A', 'B', 'C', 'D', 'F' };
+    edges = { { 'A', 'B' }, { 'A', 'C' }, { 'C', 'F' } };
+    result = UVA_599::numberOfTreesAndAcorns( edges, vertices );
+    printf( "Trees = %d Acorns = %d\n", result.first, result.second );
+}
+
 void UVA::runTest() {
+    UVA_599::runTest();
+    UVA_10158::runTest();
     UVA_11995::runTest();
+    UVA_978::runTest();
+    UVA_12049::runTest();
 }
