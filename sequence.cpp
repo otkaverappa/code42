@@ -87,3 +87,6 @@ int Sequence::largestSquare( const vector< vector< int > > & m ) {
     }
     return maxSoFar;
 }
+
+int Sequence::longestIncreasingSubsequence( const vector< int > & v, vector< int > & result ) {
+}

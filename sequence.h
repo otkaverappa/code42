@@ -33,12 +33,14 @@ public:
         maxArrayProductTest();
         maxRectangleSumTest();
         largestSquareTest();
+        longestIncreasingSubsequenceTest();
     }
 private:
     static void maxArraySumTest();
     static void maxArrayProductTest();
     static void maxRectangleSumTest();
     static void largestSquareTest();
+    static void longestIncreasingSubsequenceTest();
 };
 
 #endif // __SEQUENCE_H__
