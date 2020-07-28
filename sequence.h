@@ -24,6 +24,18 @@ public:
     //its length.
     static int longestIncreasingSubsequence( const vector< int > & v,
                                              vector< int > & result );
+    //Populate the longest decreasing subsequence of v, in result, and return
+    //its length.
+    static int longestDecreasingSubsequence( const vector< int > & v,
+                                             vector< int > & result );
+
+    //Populate the longest bitonic sequence of v, in result, and return its
+    //length.
+    static int longestBitonicSubsequence( const vector< int > & v, vector< int > & result );
+
+public:
+    //The shortest bitonic sequence is of length 3. (a, b, c) where a < b and b > c.
+    static inline const int minBitonicLen = 3;
 };
 
 class SequenceTest {
@@ -34,6 +46,8 @@ public:
         maxRectangleSumTest();
         largestSquareTest();
         longestIncreasingSubsequenceTest();
+        longestDecreasingSubsequenceTest();
+        longestBitonicSubsequenceTest();
     }
 private:
     static void maxArraySumTest();
@@ -41,6 +55,8 @@ private:
     static void maxRectangleSumTest();
     static void largestSquareTest();
     static void longestIncreasingSubsequenceTest();
+    static void longestDecreasingSubsequenceTest();
+    static void longestBitonicSubsequenceTest();
 };
 
 #endif // __SEQUENCE_H__

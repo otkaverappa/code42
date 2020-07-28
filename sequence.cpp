@@ -88,6 +88,77 @@ int Sequence::largestSquare( const vector< vector< int > > & m ) {
     return maxSoFar;
 }
 
+int Sequence::longestDecreasingSubsequence( const vector< int > & v, vector< int > & result ) {
+    vector< int > rev( v.rbegin(), v.rend() );
+    int maxLen = Sequence::longestIncreasingSubsequence( rev, result );
+    reverse( result.begin(), result.end() );
+    return maxLen;
+}
+
+int Sequence::longestBitonicSubsequence( const vector< int > & v, vector< int > & result ) {
+    vector< int > listFromLeft( v.size() ), listFromRight( v.size() );
+    vector< int > listBitonic;
+    int optLen = 0, optIndex = -1;
+    int curLen;
+
+    for( int i = 0; i < v.size(); ++i ) {
+        auto iter = upper_bound( listBitonic.begin(), listBitonic.end(), v[i] );
+        curLen = iter - listBitonic.begin() + 1;
+
+        if( iter == listBitonic.end() )
+            listBitonic.push_back( v[i] );
+        else
+            *iter = v[i];
+
+        listFromLeft[i] = curLen;
+    }
+    listBitonic.clear();
+    for( int i = v.size() - 1; i >= 0; --i ) {
+        auto iter = upper_bound( listBitonic.begin(), listBitonic.end(), v[i] );
+        curLen = iter - listBitonic.begin() + 1;
+
+        if( iter == listBitonic.end() )
+            listBitonic.push_back( v[i] );
+        else
+            *iter = v[i];
+
+        listFromRight[i] = curLen;
+
+        curLen = ( listFromLeft[i] > 1 && listFromRight[i] > 1 ) ?
+                   listFromLeft[i] + listFromRight[i] - 1 : 0;
+        if( optLen < curLen ) {
+            optLen = curLen;
+            optIndex = i;
+        }
+    }
+    //The way in which we calculate optLen should ensure that it is either 0
+    //or at least equal to the minimum possible bitonic sequence length.
+    assert( optLen == 0 || optLen >= minBitonicLen );
+
+    if( optLen ) {
+        assert( optIndex >= 0 );
+        int prevElement = INT_MAX, prevLen = listFromLeft[ optIndex ] + 1;
+        for( int i = optIndex; i >= 0; --i ) {
+            if( listFromLeft[i] == prevLen - 1 && v[i] < prevElement ) {
+                result.push_back( v[i] );
+                --prevLen;
+                prevElement = v[i];
+            }
+        }
+        reverse( result.begin(), result.end() );
+        prevElement = v[optIndex];
+        prevLen = listFromRight[ optIndex ];
+        for( int i = optIndex + 1; i < v.size(); ++i ) {
+            if( listFromRight[i] == prevLen - 1 && v[i] < prevElement ) {
+                result.push_back( v[i] );
+                --prevLen;
+                prevElement = v[i];
+            }
+        }
+    }
+    return optLen;
+}
+
 int Sequence::longestIncreasingSubsequence( const vector< int > & v, vector< int > & result ) {
     vector< int > incresingSequenceLen;
     vector< int > listLIS;
