@@ -89,4 +89,36 @@ int Sequence::largestSquare( const vector< vector< int > > & m ) {
 }
 
 int Sequence::longestIncreasingSubsequence( const vector< int > & v, vector< int > & result ) {
+    vector< int > incresingSequenceLen;
+    vector< int > listLIS;
+    int maxLen = 0, endIndex = -1;
+
+    for( int i = 0; i < v.size(); ++i ) {
+        int curLen;
+        auto iter = upper_bound( listLIS.begin(), listLIS.end(), v[i] );
+        curLen = iter - listLIS.begin() + 1;
+        if( iter == listLIS.end() )
+            listLIS.push_back( v[i] );
+        else
+            *iter = v[i];
+        if( curLen > maxLen ) {
+                maxLen = curLen;
+                endIndex = i;
+        }
+        incresingSequenceLen.push_back( curLen );
+    }
+    if( maxLen ) {
+        assert( endIndex >= 0 );
+        int prevElement = INT_MAX, prevLISLen = maxLen + 1;
+        for( int i = endIndex; i >= 0; --i ) {
+            if( incresingSequenceLen[i] == prevLISLen - 1 &&
+                v[i] < prevElement ) {
+                    result.push_back( v[i] );
+                    --prevLISLen;
+                    prevElement = v[i];
+            }
+        }
+    }
+    reverse( result.begin(), result.end() );
+    return maxLen;
 }
