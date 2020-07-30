@@ -37,9 +37,11 @@ public:
 
     //Generic Longest Increasing Subsequence - result is populated with the index of
     //elements of v, which form a longest increasing subsequence.
+    //Returns the pair (a, b) where "a" is the length of the longest increasing subsequence
+    //and "b" is the number of disjoint subsequences.
     //Time complexity - O(n^2)
     template <typename T>
-    static int genericLongestIncreasingSubsequence( const vector< T > & v,
+    static ii genericLongestIncreasingSubsequence( const vector< T > & v,
                                                     vector< int > & result );
 
 public:
@@ -69,10 +71,11 @@ private:
 };
 
 template <typename T>
-int Sequence::genericLongestIncreasingSubsequence( const vector< T > & v,
-                                                   vector< int > & result ) {
+ii Sequence::genericLongestIncreasingSubsequence( const vector< T > & v,
+                                                  vector< int > & result ) {
     vector< int > incresingSequenceLen;
     int maxLen = 0, endIndex = -1;
+    int disjointSequenceCount = 0;
 
     for( int i = 0; i < v.size(); ++i ) {
         int curLen = 1;
@@ -105,7 +108,7 @@ int Sequence::genericLongestIncreasingSubsequence( const vector< T > & v,
         }
     }
     reverse( result.begin(), result.end() );
-    return maxLen;
+    return { maxLen, disjointSequenceCount } ;
 }
 
 #endif // __SEQUENCE_H__

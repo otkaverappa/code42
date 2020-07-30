@@ -8,7 +8,7 @@ class Box;
 
 class BoxNesting {
 public:
-    static int largestNestedBoxSetSize( const vector< Box > & boxes );
+    static int largestNestedBoxSetSize( const vector< Box > & boxes, vector< int > & result );
 public:
     static void runTest();
 };
@@ -17,7 +17,8 @@ class Envelope;
 
 class EnvelopeNesting {
 public:
-    static int largestNestedEnvelopeSetSize( const vector< Envelope > & envelopes );
+    static ii largestNestedEnvelopeSetSize( const vector< Envelope > & envelopes,
+                                            vector< int > & result );
 public:
     static void runTest();
 };
