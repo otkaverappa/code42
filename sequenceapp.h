@@ -13,4 +13,13 @@ public:
     static void runTest();
 };
 
+class Envelope;
+
+class EnvelopeNesting {
+public:
+    static int largestNestedEnvelopeSetSize( const vector< Envelope > & envelopes );
+public:
+    static void runTest();
+};
+
 #endif // __SEQUENCE_APP_H__
