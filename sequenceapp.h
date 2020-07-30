@@ -13,6 +13,13 @@ public:
     static void runTest();
 };
 
+class BoxStacking {
+public:
+    static int largestStackedBoxSetHeight( const vector< Box > & boxes, vector< int > & result );
+public:
+    static void runTest();
+};
+
 class Envelope;
 
 class EnvelopeNesting {

@@ -3,6 +3,13 @@
 
 #include "common.h"
 
+template <typename T>
+int defaultLISFunction( const T& object ) {
+    return 1;
+}
+template <typename T>
+using LISFunction = function< int( const T& object ) > ;
+
 class Sequence {
 public:
     //Computes the maximum subsequence sum in the input integer array v.
@@ -42,7 +49,8 @@ public:
     //Time complexity - O(n^2)
     template <typename T>
     static ii genericLongestIncreasingSubsequence( const vector< T > & v,
-                                                    vector< int > & result );
+                                                   vector< int > & result,
+                                                   LISFunction< T > func=defaultLISFunction< T > );
 
 public:
     //The shortest bitonic sequence is of length 3. (a, b, c) where a < b and b > c.
@@ -72,17 +80,18 @@ private:
 
 template <typename T>
 ii Sequence::genericLongestIncreasingSubsequence( const vector< T > & v,
-                                                  vector< int > & result ) {
+                                                  vector< int > & result,
+                                                  LISFunction< T > func ) {
     vector< int > incresingSequenceLen;
     int maxLen = 0, endIndex = -1;
     int disjointSequenceCount = 0;
 
     for( int i = 0; i < v.size(); ++i ) {
-        int curLen = 1;
+        int curLen = func( v[i] );
 
         for( int j = i - 1; j >= 0; --j ) {
             if( v[j] < v[i] ) {
-                curLen = max( curLen, 1 + incresingSequenceLen[j] );
+                curLen = max( curLen, func( v[i] ) + incresingSequenceLen[j] );
             }
         }
         incresingSequenceLen.push_back( curLen );
@@ -99,7 +108,7 @@ ii Sequence::genericLongestIncreasingSubsequence( const vector< T > & v,
         result.push_back( endIndex );
 
         for( int i = endIndex - 1; i >= 0; --i ) {
-            if( incresingSequenceLen[i] == prevLISLen - 1 &&
+            if( incresingSequenceLen[i] == prevLISLen - func( v[i] ) &&
                 v[i] < prevElement ) {
                     result.push_back( i );
                     --prevLISLen;

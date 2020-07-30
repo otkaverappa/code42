@@ -4,9 +4,11 @@ class Box {
 public:
     unsigned int x, y, z;
     int index;
+    bool sortByBaseArea;
 public:
-    Box( unsigned int a, unsigned int b, unsigned int c, bool sortDimensions=true ) :
-         x(a), y(b), z(c), index(0) {
+    Box( unsigned int a, unsigned int b, unsigned int c, bool sortDimensions=true,
+         bool sortByBaseArea=false ) :
+         x(a), y(b), z(c), index(0), sortByBaseArea( sortByBaseArea ) {
         if( sortDimensions ) {
             //Reorder so that x <= y <= z.
             if( x > y ) swap( x, y );
@@ -16,10 +18,12 @@ public:
     }
 
     bool operator < ( const Box & other ) const {
-        return x < other.x && y < other.y && z < other.z ;
+        return ( sortByBaseArea ) ? ( x > other.x && y > other.y ) :
+               ( x < other.x && y < other.y && z < other.z ) ;
     }
 
     uint64_t volume() const { return x * y * z; }
+    uint64_t baseArea() const { return x * y; }
 };
 
 class Envelope {
@@ -129,6 +133,53 @@ void EnvelopeNesting::runTest() {
         for( int i = 0; i < result.size(); ++i ) {
             int index = result[i];
             printf( "[ %2d, %2d ] ", envelopeSet[index].width, envelopeSet[index].height );
+        }
+        printf( "\n" );
+    }
+}
+
+int weightFunction( const Box & box ) {
+    return box.z;
+}
+
+int BoxStacking::largestStackedBoxSetHeight( const vector< Box > & boxes, vector< int > & result ) {
+    vector< Box > sortedBoxes;
+    for( const auto & box : boxes ) {
+        sortedBoxes.push_back( Box( box.x, box.y, box.z, false, true ) );
+        sortedBoxes.push_back( Box( box.y, box.z, box.x, false, true ) );
+        sortedBoxes.push_back( Box( box.z, box.x, box.y, false, true ) );
+    }
+    sort( sortedBoxes.begin(), sortedBoxes.end(),
+          []( const Box & a, const Box & b )
+          {
+              return a.baseArea() > b.baseArea();
+          } );
+
+    ii sol = Sequence::genericLongestIncreasingSubsequence< Box >( sortedBoxes, result, weightFunction );
+    auto & [ maxLen, disjointSequenceCount ] = sol;
+    //Translate index in the result vector so that they are applicable
+    //to the original unsorted boxes.
+    for( int i = 0; i < result.size(); ++i )
+        result[i] = sortedBoxes[ result[i] ].index;
+    return maxLen;
+}
+
+void BoxStacking::runTest() {
+    vector< vector< Box > > testcases = {
+        {
+            {4, 6, 7}, {1, 2, 3}, {4, 5, 6}, {10, 12, 32}
+        },
+        {
+            {1, 2, 3}, {1, 2, 3}, {1, 2, 3}
+        }
+    };
+
+    for( auto & boxSet : testcases ) {
+        vector< int > result;
+        printf( "Largest stacked box set height = %d\n", largestStackedBoxSetHeight( boxSet, result ) );
+        for( int i = 0; i < result.size(); ++i ) {
+            int index = result[i];
+            printf( "[ %2d, %2d, %2d ] ", boxSet[index].x, boxSet[index].y, boxSet[index].z );
         }
         printf( "\n" );
     }
