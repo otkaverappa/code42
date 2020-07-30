@@ -22,6 +22,8 @@ public:
 
     //Populate the longest increasing subsequence of v, in result, and return
     //its length.
+    //Time complexity - O(n log k) where k is the size of the longest increasing
+    //subsequence.
     static int longestIncreasingSubsequence( const vector< int > & v,
                                              vector< int > & result );
     //Populate the longest decreasing subsequence of v, in result, and return
@@ -35,6 +37,7 @@ public:
 
     //Generic Longest Increasing Subsequence - result is populated with the index of
     //elements of v, which form a longest increasing subsequence.
+    //Time complexity - O(n^2)
     template <typename T>
     static int genericLongestIncreasingSubsequence( const vector< T > & v,
                                                     vector< int > & result );
@@ -64,5 +67,45 @@ private:
     static void longestDecreasingSubsequenceTest();
     static void longestBitonicSubsequenceTest();
 };
+
+template <typename T>
+int Sequence::genericLongestIncreasingSubsequence( const vector< T > & v,
+                                                   vector< int > & result ) {
+    vector< int > incresingSequenceLen;
+    int maxLen = 0, endIndex = -1;
+
+    for( int i = 0; i < v.size(); ++i ) {
+        int curLen = 1;
+
+        for( int j = i - 1; j >= 0; --j ) {
+            if( v[j] < v[i] ) {
+                curLen = max( curLen, 1 + incresingSequenceLen[j] );
+            }
+        }
+        incresingSequenceLen.push_back( curLen );
+
+        if( maxLen < curLen ) {
+            maxLen = curLen;
+            endIndex = i;
+        }
+    }
+    if( maxLen ) {
+        assert( endIndex >= 0 );
+        T prevElement = v[endIndex];
+        int prevLISLen = maxLen;
+        result.push_back( endIndex );
+
+        for( int i = endIndex - 1; i >= 0; --i ) {
+            if( incresingSequenceLen[i] == prevLISLen - 1 &&
+                v[i] < prevElement ) {
+                    result.push_back( i );
+                    --prevLISLen;
+                    prevElement = v[i];
+            }
+        }
+    }
+    reverse( result.begin(), result.end() );
+    return maxLen;
+}
 
 #endif // __SEQUENCE_H__

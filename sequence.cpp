@@ -159,19 +159,18 @@ int Sequence::longestBitonicSubsequence( const vector< int > & v, vector< int > 
     return optLen;
 }
 
-template <typename T>
-int Sequence::genericLongestIncreasingSubsequence( const vector< T > & v,
-                                                   vector< int > & result ) {
+int Sequence::longestIncreasingSubsequence( const vector< int > & v, vector< int > & result ) {
     vector< int > incresingSequenceLen;
-    vector< T > listLIS;
+    vector< int > listLIS;
     int maxLen = 0, endIndex = -1;
 
     for( int i = 0; i < v.size(); ++i ) {
         int curLen;
         auto iter = upper_bound( listLIS.begin(), listLIS.end(), v[i] );
         curLen = iter - listLIS.begin() + 1;
-        if( iter == listLIS.end() )
+        if( iter == listLIS.end() ) {
             listLIS.push_back( v[i] );
+        }
         else
             *iter = v[i];
         if( curLen > maxLen ) {
@@ -182,7 +181,8 @@ int Sequence::genericLongestIncreasingSubsequence( const vector< T > & v,
     }
     if( maxLen ) {
         assert( endIndex >= 0 );
-        T prevElement = v[endIndex];
+
+        int prevElement = v[endIndex];
         int prevLISLen = maxLen;
         result.push_back( endIndex );
 
@@ -196,15 +196,5 @@ int Sequence::genericLongestIncreasingSubsequence( const vector< T > & v,
         }
     }
     reverse( result.begin(), result.end() );
-    return maxLen;
-}
-
-int Sequence::longestIncreasingSubsequence( const vector< int > & v, vector< int > & result ) {
-    int maxLen = genericLongestIncreasingSubsequence( v, result );
-    //The genericLongestIncreasingSubsequence function populates result with index of elements
-    //in v which form a longest increasing subsequence. Translate the result so that it
-    //contains elements from v, rather than the index of elements.
-    for( int i = 0; i < result.size(); ++i )
-        result[i] = v[ result[i] ];
     return maxLen;
 }
