@@ -33,6 +33,12 @@ public:
     //length.
     static int longestBitonicSubsequence( const vector< int > & v, vector< int > & result );
 
+    //Generic Longest Increasing Subsequence - result is populated with the index of
+    //elements of v, which form a longest increasing subsequence.
+    template <typename T>
+    static int genericLongestIncreasingSubsequence( const vector< T > & v,
+                                                    vector< int > & result );
+
 public:
     //The shortest bitonic sequence is of length 3. (a, b, c) where a < b and b > c.
     static inline const int minBitonicLen = 3;
