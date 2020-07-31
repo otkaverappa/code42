@@ -4,11 +4,12 @@ class Box {
 public:
     unsigned int x, y, z;
     int index;
+    int id;
     bool sortByBaseArea;
 public:
-    Box( unsigned int a, unsigned int b, unsigned int c, int index=0,
-         bool sortDimensions=true, bool sortByBaseArea=false ) :
-         x(a), y(b), z(c), index(index), sortByBaseArea( sortByBaseArea ) {
+    Box( unsigned int a, unsigned int b, unsigned int c, int id=0,
+         int index=0, bool sortDimensions=true, bool sortByBaseArea=false ) :
+         x(a), y(b), z(c), id(id), index(index), sortByBaseArea( sortByBaseArea ) {
         if( sortDimensions ) {
             //Reorder so that x <= y <= z.
             if( x > y ) swap( x, y );
@@ -141,15 +142,20 @@ void EnvelopeNesting::runTest() {
 int weightFunction( const Box & box ) {
     return box.z;
 }
+int idFunction( const Box & box, int ) {
+    return box.id;
+}
 
-int BoxStacking::largestStackedBoxSetHeight( const vector< Box > & boxes, vector< int > & result ) {
+int BoxStacking::largestStackedBoxSetHeight( const vector< Box > & boxes, vector< int > & result,
+                                             bool allowMultipleInstances ) {
     vector< Box > sortedBoxes;
     bool sortDimensions = false, sortByBaseArea = true;
     for( int i = 0; i < boxes.size(); ++i ) {
         const Box & box = boxes[i];
-        sortedBoxes.push_back( Box( box.x, box.y, box.z, i, sortDimensions, sortByBaseArea ) );
-        sortedBoxes.push_back( Box( box.y, box.z, box.x, i, sortDimensions, sortByBaseArea ) );
-        sortedBoxes.push_back( Box( box.z, box.x, box.y, i, sortDimensions, sortByBaseArea ) );
+        sortedBoxes.push_back( Box( box.x, box.y, box.z, i, i, sortDimensions, sortByBaseArea ) );
+        sortedBoxes.push_back( Box( box.y, box.z, box.x, i, i, sortDimensions, sortByBaseArea ) );
+        sortedBoxes.push_back( Box( box.z, box.x, box.y, i, i, sortDimensions, sortByBaseArea ) );
+
     }
     sort( sortedBoxes.begin(), sortedBoxes.end(),
           []( const Box & a, const Box & b )
@@ -157,7 +163,14 @@ int BoxStacking::largestStackedBoxSetHeight( const vector< Box > & boxes, vector
               return a.baseArea() > b.baseArea();
           } );
 
-    ii sol = Sequence::genericLongestIncreasingSubsequence< Box >( sortedBoxes, result, weightFunction );
+    ii sol;
+    if( allowMultipleInstances )
+        sol = Sequence::genericLongestIncreasingSubsequence< Box >( sortedBoxes, result,
+                                                                    weightFunction );
+    else
+        sol = Sequence::genericLongestIncreasingSubsequence< Box >( sortedBoxes, result,
+                                                                    weightFunction, idFunction );
+
     auto & [ maxLen, disjointSequenceCount ] = sol;
     //Translate index in the result vector so that they are applicable
     //to the original unsorted boxes.
@@ -171,11 +184,24 @@ void BoxStacking::runTest() {
         {
             {4, 6, 7}, {1, 2, 3}, {4, 5, 6}, {10, 12, 32}
         },
+        {
+            {1, 2, 3}
+        }
     };
 
     for( auto & boxSet : testcases ) {
         vector< int > result;
         printf( "Largest stacked box set height = %d\n", largestStackedBoxSetHeight( boxSet, result ) );
+        for( int i = 0; i < result.size(); ++i ) {
+            int index = result[i];
+            printf( "[ %2d, %2d, %2d ] ", boxSet[index].x, boxSet[index].y, boxSet[index].z );
+        }
+        printf( "\n" );
+
+        result.clear();
+        printf( "Without allowing multiple instances of the same box\n" );
+        printf( "Largest stacked box set height = %d\n",
+                largestStackedBoxSetHeight( boxSet, result, false ) );
         for( int i = 0; i < result.size(); ++i ) {
             int index = result[i];
             printf( "[ %2d, %2d, %2d ] ", boxSet[index].x, boxSet[index].y, boxSet[index].z );

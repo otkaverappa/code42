@@ -15,7 +15,8 @@ public:
 
 class BoxStacking {
 public:
-    static int largestStackedBoxSetHeight( const vector< Box > & boxes, vector< int > & result );
+    static int largestStackedBoxSetHeight( const vector< Box > & boxes, vector< int > & result,
+                                           bool allowMultipleInstances=true );
 public:
     static void runTest();
 };

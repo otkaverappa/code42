@@ -3,12 +3,23 @@
 
 #include "common.h"
 
+//Functions used in generic longest increasing subsequence calculation. (BEGIN)
 template <typename T>
 int defaultLISFunction( const T& object ) {
     return 1;
 }
+
+template <typename T>
+int defaultIDFunction( const T& object, int index ) {
+    return index;
+}
+
 template <typename T>
 using LISFunction = function< int( const T& object ) > ;
+
+template <typename T>
+using IDFunction = function< int( const T& object, int index ) > ;
+//Functions used in generic longest increasing subsequence calculation. (END)
 
 class Sequence {
 public:
@@ -50,7 +61,8 @@ public:
     template <typename T>
     static ii genericLongestIncreasingSubsequence( const vector< T > & v,
                                                    vector< int > & result,
-                                                   LISFunction< T > func=defaultLISFunction< T > );
+                                                   LISFunction< T > func=defaultLISFunction< T >,
+                                                   IDFunction< T > idFunc=defaultIDFunction< T > );
 
 public:
     //The shortest bitonic sequence is of length 3. (a, b, c) where a < b and b > c.
@@ -81,20 +93,29 @@ private:
 template <typename T>
 ii Sequence::genericLongestIncreasingSubsequence( const vector< T > & v,
                                                   vector< int > & result,
-                                                  LISFunction< T > func ) {
+                                                  LISFunction< T > func,
+                                                  IDFunction< T > idFunc ) {
     vector< int > incresingSequenceLen;
+    vector< int > reconstructionVec;
+
     int maxLen = 0, endIndex = -1;
     int disjointSequenceCount = 0;
 
     for( int i = 0; i < v.size(); ++i ) {
-        int curLen = func( v[i] );
+        int weight = func( v[i] );
+        int curLen = weight;
+        int bestValueIndex = i;
 
         for( int j = i - 1; j >= 0; --j ) {
-            if( v[j] < v[i] ) {
-                curLen = max( curLen, func( v[i] ) + incresingSequenceLen[j] );
+            if( v[j] < v[i] && curLen < weight + incresingSequenceLen[j] ) {
+                if( idFunc( v[i], i ) == idFunc( v[j], j ) )
+                    continue;
+                curLen = weight + incresingSequenceLen[j];
+                bestValueIndex = j;
             }
         }
         incresingSequenceLen.push_back( curLen );
+        reconstructionVec.push_back( bestValueIndex );
 
         if( maxLen < curLen ) {
             maxLen = curLen;
@@ -103,19 +124,12 @@ ii Sequence::genericLongestIncreasingSubsequence( const vector< T > & v,
     }
     if( maxLen ) {
         assert( endIndex >= 0 );
-        T prevElement = v[endIndex];
-        int prevLISLen = maxLen;
-        int prevIndex = endIndex;
-        result.push_back( prevIndex );
 
-        for( int i = endIndex - 1; i >= 0; --i ) {
-            if( incresingSequenceLen[i] == prevLISLen - func( v[prevIndex] ) &&
-                v[i] < prevElement ) {
-                    result.push_back( i );
-                    prevLISLen -= func( v[prevIndex] );
-                    prevElement = v[i];
-                    prevIndex = i;
-            }
+        while( true ) {
+            result.push_back( endIndex );
+            if( endIndex == reconstructionVec[ endIndex ] )
+                break;
+            endIndex = reconstructionVec[ endIndex ];
         }
     }
     reverse( result.begin(), result.end() );
