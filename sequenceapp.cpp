@@ -6,9 +6,9 @@ public:
     int index;
     bool sortByBaseArea;
 public:
-    Box( unsigned int a, unsigned int b, unsigned int c, bool sortDimensions=true,
-         bool sortByBaseArea=false ) :
-         x(a), y(b), z(c), index(0), sortByBaseArea( sortByBaseArea ) {
+    Box( unsigned int a, unsigned int b, unsigned int c, int index=0,
+         bool sortDimensions=true, bool sortByBaseArea=false ) :
+         x(a), y(b), z(c), index(index), sortByBaseArea( sortByBaseArea ) {
         if( sortDimensions ) {
             //Reorder so that x <= y <= z.
             if( x > y ) swap( x, y );
@@ -144,10 +144,12 @@ int weightFunction( const Box & box ) {
 
 int BoxStacking::largestStackedBoxSetHeight( const vector< Box > & boxes, vector< int > & result ) {
     vector< Box > sortedBoxes;
-    for( const auto & box : boxes ) {
-        sortedBoxes.push_back( Box( box.x, box.y, box.z, false, true ) );
-        sortedBoxes.push_back( Box( box.y, box.z, box.x, false, true ) );
-        sortedBoxes.push_back( Box( box.z, box.x, box.y, false, true ) );
+    bool sortDimensions = false, sortByBaseArea = true;
+    for( int i = 0; i < boxes.size(); ++i ) {
+        const Box & box = boxes[i];
+        sortedBoxes.push_back( Box( box.x, box.y, box.z, i, sortDimensions, sortByBaseArea ) );
+        sortedBoxes.push_back( Box( box.y, box.z, box.x, i, sortDimensions, sortByBaseArea ) );
+        sortedBoxes.push_back( Box( box.z, box.x, box.y, i, sortDimensions, sortByBaseArea ) );
     }
     sort( sortedBoxes.begin(), sortedBoxes.end(),
           []( const Box & a, const Box & b )
@@ -169,9 +171,6 @@ void BoxStacking::runTest() {
         {
             {4, 6, 7}, {1, 2, 3}, {4, 5, 6}, {10, 12, 32}
         },
-        {
-            {1, 2, 3}, {1, 2, 3}, {1, 2, 3}
-        }
     };
 
     for( auto & boxSet : testcases ) {

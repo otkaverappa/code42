@@ -105,14 +105,16 @@ ii Sequence::genericLongestIncreasingSubsequence( const vector< T > & v,
         assert( endIndex >= 0 );
         T prevElement = v[endIndex];
         int prevLISLen = maxLen;
-        result.push_back( endIndex );
+        int prevIndex = endIndex;
+        result.push_back( prevIndex );
 
         for( int i = endIndex - 1; i >= 0; --i ) {
-            if( incresingSequenceLen[i] == prevLISLen - func( v[i] ) &&
+            if( incresingSequenceLen[i] == prevLISLen - func( v[prevIndex] ) &&
                 v[i] < prevElement ) {
                     result.push_back( i );
-                    --prevLISLen;
+                    prevLISLen -= func( v[prevIndex] );
                     prevElement = v[i];
+                    prevIndex = i;
             }
         }
     }
