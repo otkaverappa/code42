@@ -108,7 +108,18 @@ ii Sequence::genericLongestIncreasingSubsequence( const vector< T > & v,
 
         for( int j = i - 1; j >= 0; --j ) {
             if( v[j] < v[i] && curLen < weight + incresingSequenceLen[j] ) {
-                if( idFunc( v[i], i ) == idFunc( v[j], j ) )
+                bool isRepeatedInstance = false;
+                int k = j;
+                while( true ) {
+                    if( idFunc( v[i], i ) == idFunc( v[k], k ) ) {
+                        isRepeatedInstance = true;
+                        break;
+                    }
+                    if( k == reconstructionVec[k] )
+                        break;
+                    k = reconstructionVec[k];
+                }
+                if( isRepeatedInstance )
                     continue;
                 curLen = weight + incresingSequenceLen[j];
                 bestValueIndex = j;
