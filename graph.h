@@ -4,7 +4,7 @@
 #include "common.h"
 
 class Graph {
-public:
+private:
     struct Edge {
         int v;
         int weight;
@@ -23,58 +23,37 @@ public:
 public:
     Graph( int nvertices, bool directed );
 
-    bool addEdge( int u, int v, int weight, int label );
+    bool addEdge( int u, int v, int weight=1, int label=0 );
     bool addEdges( const vector< ii > &edges );
-    bool isDirected() { return directed; }
+
+    bool isDirected() const {
+        return directed;
+    }
+
+    bool isEmpty() const {
+        return nvertices == 0;
+    }
+
+    bool isVertexWithinRange( int u ) const {
+        return ( u >= 0 && u < nvertices );
+    }
 
     ~Graph() {}
 
 public:
-    //public utility functions.
     void printGraph();
 
-private:
-    //private utility functions.
-    bool isVertexWithinRange( int u ) {
-        return ( u >= 0 && u < nvertices );
-    }
+    friend class GraphTest;
+    friend class GraphFunctions;
 };
 
-Graph::Graph( int nvertices, bool directed ) :
-       nvertices( nvertices ), directed( directed ) {
-           assert( nvertices > 0 );
-           adjList.resize( nvertices );
-}
-
-bool Graph::addEdge( int u, int v, int weight = 1, int label = 0 ) {
-    if( !isVertexWithinRange( u ) || !isVertexWithinRange( v ) )
-        return false;
-    Edge edge( v, weight, label );
-    adjList[ u ].push_back( edge );
-    ++nedges;
-    if( !isDirected() ) {
-        Edge revEdge( u, weight, label );
-        adjList[ v ].push_back( revEdge );
-    }
-    return true;
-}
-
-bool Graph::addEdges( const vector<ii> &edges ) {
-    for( const ii& edge : edges )
-        addEdge( edge.first, edge.second );
-}
-
-void Graph::printGraph() {
-    printf( "Graph@%p Vertices=%3d Edges=%3d Directed=%s\n",
-            this, nvertices, nedges, directed ? "True" : "False" );
-    for( int i = 0; i < nvertices; ++i ) {
-        printf( "Vertex:%3d --- ", i );
-        for( Edge& e : adjList[ i ] ) {
-            printf( "( %3d ,%3d, %3d ) ", e.v, e.weight, e.label );
-        }
-        printf( "\n" );
-    }
-}
+class GraphFunctions {
+public:
+    static int BFS( const Graph & g, int startVertex, int endVertex ,
+                    vector< int > & path );
+    static int bidirectionalBFS( const Graph & g, int startVertex, int endVertex,
+                                 vector< int > & path );
+};
 
 class GraphTest {
 public:

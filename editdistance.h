@@ -24,6 +24,9 @@ public:
     static int calculateEditDistance( const string& src, const string& dst,
                                       vector< char > & editSequence,
                                       const vector< int > & editCosts = defaultEditCosts );
+
+    //Do the two given strings differ by a single character ?
+    static bool isUnitEditDistance( const string& src, const string & dst );
 public:
     //Helper function to print the sequence of optimal edits.
     static void printEditSequence( const string& src, const string& dst,

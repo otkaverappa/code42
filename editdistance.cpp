@@ -109,11 +109,25 @@ void EditDistance::printEditSequence( const string& src, const string& dst,
 }
 
 int EditDistance::uniformEditDistance( const string& src, const string& dst ) {
-    //Cost of COPY, REPLACE, INSERT, DELETE is set to 1. Cost of TWIDDLE
-    //is set to a high value so that it is effectively disabled.
-    vector< int > editCosts = { 1, 1, 1, 1, 0xFFFF };
+    //Cost of COPY is set to 0, and cost of REPLACE, INSERT, DELETE is set to 1.
+    //Cost of TWIDDLE is set to a high value so that it is effectively disabled.
+    vector< int > editCosts = { 0, 1, 1, 1, 0xFFFF };
     vector< char > editSequence;
     return EditDistance::calculateEditDistance( src, dst, editSequence, editCosts );
+}
+
+bool EditDistance::isUnitEditDistance( const string& src, const string & dst ) {
+    int N;
+    if( ( N = src.size() ) != dst.size() )
+        return false;
+    int diffCount = 0;
+    for( int i = 0; i < N; ++i ) {
+        if( src[i] != dst[i] )
+            ++diffCount;
+        if( diffCount > 1 )
+            return false;
+    }
+    return diffCount == 1 ;
 }
 
 void EditDistanceTest::editDistanceTest() {

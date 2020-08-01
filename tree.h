@@ -1,9 +1,8 @@
-#include <vector>
-#include <map>
-#include <stack>
+#ifndef __TREE_H__
+#define __TREE_H__
 
-typedef pair< int, int > ii;
-
+#include "common.h"
+/*
 class BinaryTreeNode {
 public:
     int value;
@@ -314,49 +313,52 @@ void testBinaryTreeFunctions() {
     BinaryTree constructedTree2 = BinaryTree::construct( preorder, inorder );
     assert( completeTree.isEqual( constructedTree2 ) );
 }
-
+*/
 class TreeNode {
 public:
-    int value;
     int id;
     vector< TreeNode* > children;
 
     TreeNode( int id ) : id( id ) {}
 
-    bool addChild( TreeNode* t ) { children.push_back( t ); return true; }
-    bool isLeaf() const { return nChildren() == 0; }
-    int nChildren() const { return children.size(); }
-};
-
-class Tree {
-public:
-    TreeNode *root;
-    int nvertices;
-
-    Tree( TreeNode *root = nullptr ) : root( root ) {}
-    Tree( TreeNode *root, int nvertices ) :
-          root( root ), nvertices( nvertices ) {}
-
-    bool isEmpty() const { return root == nullptr; }
-
-    bool traverseLevelOrder( vector< TreeNode* > &result ) const {
-        queue< TreeNode* > q;
-        if( root )
-            q.push( root );
-        while( !q.empty() ) {
-            int count = q.size();
-            while( count-- ) {
-                TreeNode* n = q.front(); q.pop();
-                result.push_back( n );
-                for( TreeNode* ch : n->children )
-                    q.push( ch );
-            }
-            result.push_back( nullptr );
-        }
+    bool addChild( TreeNode* t ) {
+        children.push_back( t );
         return true;
+    }
+
+    bool isLeaf() const {
+        return nchildren() == 0;
+    }
+
+    int nchildren() const {
+        return children.size();
     }
 };
 
+class Tree {
+private:
+    TreeNode *root;
+    int nvertices;
+
+    Tree() : root( nullptr ), nvertices(0) {}
+
+    Tree( TreeNode *root, int nvertices ) :
+          root( root ), nvertices( nvertices ) {}
+
+public:
+    bool isEmpty() const {
+        return root == nullptr;
+    }
+
+    static Tree createTree( const vector< ii > & edges );
+};
+
+class TreeFunctions {
+public:
+    int diameter( const Tree & tree, vector< int > & path );
+};
+
+/*
 Tree createTree( vector< pair< int, int > > &links,
                  const vector< int > *elements = nullptr ) {
     int nvertices = links.size() + 1; //vertices are numbered from 0 to nvertices - 1,
@@ -617,4 +619,5 @@ void testMessageRounds() {
     int count = messageRounds( t.root );
     printf( "Minimum number of message rounds = %d\n", count );
 }
-
+*/
+#endif // __TREE_H__
