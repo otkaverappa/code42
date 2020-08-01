@@ -169,7 +169,7 @@ int BoxStacking::largestStackedBoxSetHeight( const vector< Box > & boxes, vector
                                                                     weightFunction );
     else
         sol = Sequence::genericLongestIncreasingSubsequence< Box >( sortedBoxes, result,
-                                                                    weightFunction, idFunction );
+                                                                    weightFunction, true, idFunction );
 
     auto & [ maxLen, disjointSequenceCount ] = sol;
     //Translate index in the result vector so that they are applicable

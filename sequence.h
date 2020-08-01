@@ -57,11 +57,13 @@ public:
     //elements of v, which form a longest increasing subsequence.
     //Returns the pair (a, b) where "a" is the length of the longest increasing subsequence
     //and "b" is the number of disjoint subsequences.
-    //Time complexity - O(n^2)
+    //Time complexity - O(n^2) if "noDuplicates" is false.
+    //                - O(n^3) if "noDuplicates" is true.
     template <typename T>
     static ii genericLongestIncreasingSubsequence( const vector< T > & v,
                                                    vector< int > & result,
                                                    LISFunction< T > func=defaultLISFunction< T >,
+                                                   bool noDuplicates=false,
                                                    IDFunction< T > idFunc=defaultIDFunction< T > );
 
 public:
@@ -94,6 +96,7 @@ template <typename T>
 ii Sequence::genericLongestIncreasingSubsequence( const vector< T > & v,
                                                   vector< int > & result,
                                                   LISFunction< T > func,
+                                                  bool noDuplicates,
                                                   IDFunction< T > idFunc ) {
     vector< int > incresingSequenceLen;
     vector< int > reconstructionVec;
@@ -110,7 +113,7 @@ ii Sequence::genericLongestIncreasingSubsequence( const vector< T > & v,
             if( v[j] < v[i] && curLen < weight + incresingSequenceLen[j] ) {
                 bool isRepeatedInstance = false;
                 int k = j;
-                while( true ) {
+                while( noDuplicates ) {
                     if( idFunc( v[i], i ) == idFunc( v[k], k ) ) {
                         isRepeatedInstance = true;
                         break;
