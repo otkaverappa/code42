@@ -56,21 +56,37 @@ public:
 
 class GraphFunctions {
 public:
+    enum {
+        SHORTEST_WEIGHT_PATH = 0,
+        MIN_MAX_WEIGHT_PATH = 1,
+        INVALID_POLICY = 2
+    };
+public:
     static int BFS( const Graph & g, int startVertex, int endVertex ,
                     vector< int > & path );
     static int bidirectionalBFS( const Graph & g, int startVertex, int endVertex,
                                  vector< int > & path );
     static int minimumSpanningTree( const Graph & g, vector< ii > & treeEdges );
     static int minimumSpanningTreeUsingUF( const Graph & g, vector< ii > & treeEdges );
+    static int findPath( const Graph & g, int startVertex, int endVertex, int policy,
+                         vector< ii > & path );
+public:
+    struct Comparator {
+        bool operator () ( const Graph::EdgeData& e1, const Graph::EdgeData& e2 ) {
+            return e1.weight > e2.weight;
+        }
+    };
 };
 
 class GraphFunctionsTest {
 public:
     static void runTest() {
         minimumSpanningTreeTest();
+        findPathTest();
     }
 private:
     static void minimumSpanningTreeTest();
+    static void findPathTest();
 };
 
 class GraphTest {

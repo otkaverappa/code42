@@ -229,18 +229,9 @@ int GraphFunctions::minimumSpanningTree( const Graph & g, vector< ii > & treeEdg
     assert( !g.isDirected() );
     vector< bool > vertexIncludedInMST( g.nvertices, false );
 
-    struct Comparator {
-        bool operator () ( const Graph::EdgeData& e1, const Graph::EdgeData& e2 ) {
-            return e1.weight > e2.weight;
-        }
-    };
-
-    priority_queue< Graph::EdgeData, vector< Graph::EdgeData>, Comparator > pq;
+    priority_queue< Graph::EdgeData, vector< Graph::EdgeData >, Comparator > pq;
     int startVertex = 0;
-    for( const Graph::Edge & edge : g.adjList[ startVertex ] ) {
-        pq.push( Graph::EdgeData( startVertex, edge.v, edge.weight ) );
-    }
-    vertexIncludedInMST[ startVertex ] = true;
+    pq.push( Graph::EdgeData( startVertex, startVertex, 0 ) );
 
     int totalWeight = 0;
     while( !pq.empty() ) {
@@ -248,8 +239,8 @@ int GraphFunctions::minimumSpanningTree( const Graph & g, vector< ii > & treeEdg
 
         if( vertexIncludedInMST[ e.v ] )
             continue;
-
-        treeEdges.push_back( { e.u, e.v } );
+        if( e.u != e.v )
+            treeEdges.push_back( { e.u, e.v } );
         totalWeight += e.weight;
         vertexIncludedInMST[ e.v ] = true;
 
@@ -287,4 +278,67 @@ void GraphFunctionsTest::minimumSpanningTreeTest() {
     treeEdges.clear();
     mstWeight2 = GraphFunctions::minimumSpanningTreeUsingUF( g2, treeEdges );
     printf( "Weight of Minimum Spanning Tree = %d\n", mstWeight2 );
+}
+
+int GraphFunctions::findPath( const Graph & g, int startVertex, int endVertex, int policy,
+                              vector< ii > & path ) {
+    assert( policy >= 0 && policy < INVALID_POLICY );
+    if( g.isEmpty() || !g.isVertexWithinRange( startVertex ) || !g.isVertexWithinRange( endVertex )
+        || startVertex == endVertex )
+        return 0;
+
+    typedef pair< int, ii > state;
+    priority_queue< state, vector< state >, greater< state > > pq;
+    vector< ii > costAndParent( g.nvertices, { INT_MAX, 0 } );
+    bool searchSuccessful = false;
+
+    pq.push( state( 0, { startVertex, startVertex } ) );
+
+    while( !pq.empty() ) {
+        state curState = pq.top(); pq.pop();
+        auto & [ curCost, curVertexAndParent ] = curState;
+        auto & [ curVertex, parent ] = curVertexAndParent;
+        //Process the current vertex only if its associated cost is "better"
+        //than what we have recorded so far.
+        if( curCost < costAndParent[ curVertex ].first ) {
+            costAndParent[ curVertex ] = { curCost, parent };
+            if( curVertex == endVertex ) {
+                searchSuccessful = true;
+                break;
+            }
+            for( const Graph::Edge & e : g.adjList[ curVertex ] ) {
+                if( e.v == parent ) continue;
+                if( e.weight < costAndParent[ e.v ].first ) {
+                    pq.push( { e.weight, { e.v, curVertex } } );
+                }
+            }
+        }
+    }
+    int maxPathLen = INT_MIN;
+    if( searchSuccessful ) {
+        int curVertex = endVertex;
+        while( true ) {
+            auto & [ cost, parent ] = costAndParent[ curVertex ];
+            path.push_back( { parent, curVertex } );
+            maxPathLen = max( maxPathLen, cost );
+            curVertex = parent;
+            if( curVertex == startVertex )
+                break;
+        }
+        reverse( path.begin(), path.end() );
+    }
+    return maxPathLen;
+}
+
+void GraphFunctionsTest::findPathTest() {
+    Graph g( 7, false );
+    vector< Graph::EdgeData > edges = {
+        { 0, 1, 50 }, { 0, 2, 60 }, { 1, 4, 90 }, { 4, 6, 40 }, { 2, 5, 50 }, { 5, 6, 140 },
+        { 1, 3, 120 }, { 3, 6, 70 }, { 3, 5, 80 }
+    };
+    g.addEdgesWithWeights( edges );
+
+    vector< ii > path;
+    int maxPathLen = GraphFunctions::findPath( g, 0, 6, GraphFunctions::MIN_MAX_WEIGHT_PATH, path );
+    printf( "Maximum path length = %d\n", maxPathLen );
 }
