@@ -5,6 +5,10 @@
 
 class Graph {
 private:
+    struct EdgeData {
+        int u, v, weight;
+        EdgeData( int u, int v, int weight ) : u( u ), v( v ), weight( weight ) {}
+    };
     struct Edge {
         int v;
         int weight;
@@ -24,7 +28,8 @@ public:
     Graph( int nvertices, bool directed );
 
     bool addEdge( int u, int v, int weight=1, int label=0 );
-    bool addEdges( const vector< ii > &edges );
+    bool addEdgesWithUnitWeights( const vector< ii > &edges );
+    bool addEdgesWithWeights( const vector< EdgeData > & edges );
 
     bool isDirected() const {
         return directed;
@@ -45,6 +50,7 @@ public:
 
     friend class GraphTest;
     friend class GraphFunctions;
+    friend class GraphFunctionsTest;
 };
 
 class GraphFunctions {
@@ -53,6 +59,16 @@ public:
                     vector< int > & path );
     static int bidirectionalBFS( const Graph & g, int startVertex, int endVertex,
                                  vector< int > & path );
+    static int minimumSpanningTree( const Graph & g, vector< ii > & treeEdges );
+};
+
+class GraphFunctionsTest {
+public:
+    static void runTest() {
+        minimumSpanningTreeTest();
+    }
+private:
+    static void minimumSpanningTreeTest();
 };
 
 class GraphTest {
@@ -153,7 +169,7 @@ private:
         Graph g( 6, true );
         vector<ii> edges { {0,1}, {1,2}, {1,4}, {3,2}, {4,3}, {4,5}, {5,0} };
         string vertexLabels = "swtzyx";
-        g.addEdges( edges );
+        g.addEdgesWithUnitWeights( edges );
 
         vector< int > path;
         graphDivisiblePath( g, 0, 2, 3, path);

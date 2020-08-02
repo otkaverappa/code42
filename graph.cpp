@@ -19,9 +19,14 @@ bool Graph::addEdge( int u, int v, int weight, int label ) {
     return true;
 }
 
-bool Graph::addEdges( const vector<ii> &edges ) {
+bool Graph::addEdgesWithUnitWeights( const vector<ii> &edges ) {
     for( const ii& edge : edges )
         addEdge( edge.first, edge.second );
+}
+
+bool Graph::addEdgesWithWeights( const vector< EdgeData > & edges ) {
+    for( const EdgeData & edge : edges )
+        addEdge( edge.u, edge.v, edge.weight );
 }
 
 void Graph::printGraph() {
@@ -183,4 +188,54 @@ int GraphFunctions::BFS( const Graph & g, int startVertex, int endVertex,
         reverse( path.begin(), path.end() );
     }
     return pathFound ? path.size() : notFound;
+}
+
+int GraphFunctions::minimumSpanningTree( const Graph & g, vector< ii > & treeEdges ) {
+    if( g.isEmpty() )
+        return 0;
+    assert( !g.isDirected() );
+    vector< bool > vertexIncludedInMST( g.nvertices, false );
+
+    struct Comparator {
+        bool operator () ( const Graph::EdgeData& e1, const Graph::EdgeData& e2 ) {
+            return e1.weight > e2.weight;
+        }
+    };
+
+    priority_queue< Graph::EdgeData, vector< Graph::EdgeData>, Comparator > pq;
+    int startVertex = 0;
+    for( const Graph::Edge & edge : g.adjList[ startVertex ] ) {
+        pq.push( Graph::EdgeData( startVertex, edge.v, edge.weight ) );
+    }
+    vertexIncludedInMST[ startVertex ] = true;
+
+    int totalWeight = 0;
+    while( !pq.empty() ) {
+        Graph::EdgeData e = pq.top(); pq.pop();
+
+        if( vertexIncludedInMST[ e.v ] )
+            continue;
+
+        treeEdges.push_back( { e.u, e.v } );
+        totalWeight += e.weight;
+        vertexIncludedInMST[ e.v ] = true;
+
+        for( const Graph::Edge & edge : g.adjList[ e.v ] ) {
+            if( vertexIncludedInMST[ edge.v ] == false )
+                pq.push( Graph::EdgeData( e.v, edge.v, edge.weight ) );
+        }
+    }
+    return totalWeight;
+}
+
+void GraphFunctionsTest::minimumSpanningTreeTest() {
+    Graph g( 5, false );
+    vector< Graph::EdgeData > edges = {
+        { 0, 1, 4 }, { 0, 2, 4 }, { 0, 3, 6 }, { 0, 4, 6 }, { 1, 2, 2 }, { 2, 3, 8 },
+        { 3, 4, 9 }
+    };
+    g.addEdgesWithWeights( edges );
+    vector< ii > treeEdges;
+    int mstWeight = GraphFunctions::minimumSpanningTree( g, treeEdges );
+    printf( "Weight of Minimum Spanning Tree = %d\n", mstWeight );
 }
