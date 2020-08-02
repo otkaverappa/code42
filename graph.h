@@ -2,6 +2,7 @@
 #define __GRAPH_H__
 
 #include "common.h"
+#include "unionfind.h"
 
 class Graph {
 private:
@@ -60,6 +61,7 @@ public:
     static int bidirectionalBFS( const Graph & g, int startVertex, int endVertex,
                                  vector< int > & path );
     static int minimumSpanningTree( const Graph & g, vector< ii > & treeEdges );
+    static int minimumSpanningTreeUsingUF( const Graph & g, vector< ii > & treeEdges );
 };
 
 class GraphFunctionsTest {

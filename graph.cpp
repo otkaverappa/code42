@@ -190,6 +190,39 @@ int GraphFunctions::BFS( const Graph & g, int startVertex, int endVertex,
     return pathFound ? path.size() : notFound;
 }
 
+int GraphFunctions:: minimumSpanningTreeUsingUF( const Graph & g, vector< ii > & treeEdges ) {
+    if( g.isEmpty() )
+        return 0;
+    assert( !g.isDirected() );
+
+    UnionFind< int > uf;
+    vector< Graph::EdgeData > allEdges;
+
+    struct Comparator {
+        bool operator () ( const Graph::EdgeData& e1, const Graph::EdgeData& e2 ) {
+            return e1.weight < e2.weight;
+        }
+    };
+
+    for( int i = 0; i < g.nvertices; ++i ) {
+        uf.addSet( i );
+        for( const Graph::Edge & edge : g.adjList[ i ] ) {
+            allEdges.emplace_back( Graph::EdgeData( i, edge.v, edge.weight ) );
+        }
+    }
+    sort( allEdges.begin(), allEdges.end(), Comparator() );
+
+    int totalWeight = 0;
+    for( const Graph::EdgeData & e : allEdges ) {
+        if( uf.find( e.u ) != uf.find( e.v ) ) {
+            totalWeight += e.weight;
+            treeEdges.push_back( { e.u, e.v } );
+            uf.merge( e.u, e.v );
+        }
+    }
+    return totalWeight;
+}
+
 int GraphFunctions::minimumSpanningTree( const Graph & g, vector< ii > & treeEdges ) {
     if( g.isEmpty() )
         return 0;
@@ -238,4 +271,20 @@ void GraphFunctionsTest::minimumSpanningTreeTest() {
     vector< ii > treeEdges;
     int mstWeight = GraphFunctions::minimumSpanningTree( g, treeEdges );
     printf( "Weight of Minimum Spanning Tree = %d\n", mstWeight );
+    treeEdges.clear();
+    mstWeight = GraphFunctions::minimumSpanningTreeUsingUF( g, treeEdges );
+    printf( "Weight of Minimum Spanning Tree = %d\n", mstWeight );
+
+    Graph g2( 5, false );
+    vector< Graph::EdgeData > edges2 = {
+        { 0, 1, 9 }, { 0, 2, 75 }, { 2, 3, 51 }, { 2, 1, 95 }, { 1, 3, 19 }, { 1, 4, 42 },
+        { 3, 4, 31 }, { 2, 4, 66 }
+    };
+    g2.addEdgesWithWeights( edges2 );
+    treeEdges.clear();
+    int mstWeight2 = GraphFunctions::minimumSpanningTree( g2, treeEdges );
+    printf( "Weight of Minimum Spanning Tree = %d\n", mstWeight2 );
+    treeEdges.clear();
+    mstWeight2 = GraphFunctions::minimumSpanningTreeUsingUF( g2, treeEdges );
+    printf( "Weight of Minimum Spanning Tree = %d\n", mstWeight2 );
 }
