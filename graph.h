@@ -65,6 +65,10 @@ public:
         PATH_WEIGHT_NO_PATH = INT_MAX,
         PATH_WEIGHT_ZERO = 0,
     };
+    enum {
+        NEGATIVE_WEIGHT_CYCLE_NOT_PRESENT = 0,
+        NEGATIVE_WEIGHT_CYCLE_PRESENT = 1,
+    };
 public:
     static int BFS( const Graph & g, int startVertex, int endVertex ,
                     vector< int > & path );
@@ -74,6 +78,7 @@ public:
     static int minimumSpanningTreeUsingUF( const Graph & g, vector< ii > & treeEdges );
     static int findPath( const Graph & g, int startVertex, int endVertex, int policy,
                          vector< ii > & path );
+    static int allPathsShortestPath( const Graph & g, vector< vector< int > > &allPaths );
 public:
     struct Comparator {
         bool operator () ( const Graph::EdgeData& e1, const Graph::EdgeData& e2 ) {
@@ -87,10 +92,12 @@ public:
     static void runTest() {
         minimumSpanningTreeTest();
         findPathTest();
+        allPathsShortestPathTest();
     }
 private:
     static void minimumSpanningTreeTest();
     static void findPathTest();
+    static void allPathsShortestPathTest();
 };
 
 class GraphTest {

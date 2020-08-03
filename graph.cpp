@@ -288,7 +288,7 @@ int GraphFunctions::findPath( const Graph & g, int startVertex, int endVertex, i
         return PATH_WEIGHT_ZERO;
 
     priority_queue< ii, vector< ii >, greater< ii > > pq;
-    vector< ii > costAndParent( g.nvertices, { INT_MAX, 0 } );
+    vector< ii > costAndParent( g.nvertices, { PATH_WEIGHT_NO_PATH, 0 } );
     bool searchSuccessful = false;
 
     pq.push( { 0, startVertex } );
@@ -337,6 +337,31 @@ int GraphFunctions::findPath( const Graph & g, int startVertex, int endVertex, i
     return PATH_WEIGHT_NO_PATH;
 }
 
+int GraphFunctions::allPathsShortestPath( const Graph & g, vector< vector< int > > & allPaths ) {
+    if( g.isEmpty() )
+        return NEGATIVE_WEIGHT_CYCLE_NOT_PRESENT;
+    int N = g.nvertices;
+    allPaths.resize( N, vector< int >( N, PATH_WEIGHT_NO_PATH ) );
+
+    for( int i = 0; i < N; ++i ) {
+        allPaths[i][i] = 0;
+        for( const Graph::Edge & edge : g.adjList[i] ) {
+            allPaths[i][edge.v] = edge.weight;
+        }
+    }
+    for( int k = 0; k < N; ++k ) {
+        for( int i = 0; i < N; ++i ) {
+            for( int j = 0; j < N; ++j ) {
+                if( allPaths[i][k] == PATH_WEIGHT_NO_PATH ||
+                    allPaths[k][j] == PATH_WEIGHT_NO_PATH )
+                        continue;
+                allPaths[i][j] = min( allPaths[i][k] + allPaths[k][j], allPaths[i][j] );
+            }
+        }
+    }
+    return NEGATIVE_WEIGHT_CYCLE_NOT_PRESENT;
+}
+
 void GraphFunctionsTest::findPathTest() {
     Graph g( 7, false );
     vector< Graph::EdgeData > edges = {
@@ -352,4 +377,26 @@ void GraphFunctionsTest::findPathTest() {
     path.clear();
     pathLen = GraphFunctions::findPath( g, 0, 6, GraphFunctions::SHORTEST_WEIGHT_PATH, path );
     printf( "Best path weight = %d\n", pathLen );
+}
+
+void GraphFunctionsTest::allPathsShortestPathTest() {
+    Graph g( 5, true );
+    vector< Graph::EdgeData > edges = {
+        { 0, 1, 2 }, { 0, 2, 1 }, { 1, 3, 4 }, { 2, 1, 1 }, { 2, 4, 1 }, { 3, 0, 1 },
+        { 3, 4, 5 }, { 0, 4, 3 }, { 3, 2, 3 }
+    };
+    g.addEdgesWithWeights( edges );
+
+    vector< vector< int > > allPaths;
+    GraphFunctions::allPathsShortestPath( g, allPaths );
+    for( int i = 0; i < g.nvertices; ++i ) {
+        for( int j = 0; j < g.nvertices; ++j ) {
+            if( i != j ) {
+                printf( "Shortest path from vertex %2d to vertex %2d = %s\n", i, j,
+                        allPaths[i][j] == GraphFunctions::PATH_WEIGHT_NO_PATH ?
+                        "(INF)" : to_string( allPaths[i][j] ).c_str() );
+            }
+        }
+    }
+    printf( "\n" );
 }
