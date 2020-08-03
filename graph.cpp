@@ -285,49 +285,56 @@ int GraphFunctions::findPath( const Graph & g, int startVertex, int endVertex, i
     assert( policy >= 0 && policy < INVALID_POLICY );
     if( g.isEmpty() || !g.isVertexWithinRange( startVertex ) || !g.isVertexWithinRange( endVertex )
         || startVertex == endVertex )
-        return 0;
+        return PATH_WEIGHT_ZERO;
 
-    typedef pair< int, ii > state;
-    priority_queue< state, vector< state >, greater< state > > pq;
+    priority_queue< ii, vector< ii >, greater< ii > > pq;
     vector< ii > costAndParent( g.nvertices, { INT_MAX, 0 } );
     bool searchSuccessful = false;
 
-    pq.push( state( 0, { startVertex, startVertex } ) );
+    pq.push( { 0, startVertex } );
 
     while( !pq.empty() ) {
-        state curState = pq.top(); pq.pop();
-        auto & [ curCost, curVertexAndParent ] = curState;
-        auto & [ curVertex, parent ] = curVertexAndParent;
+        ii curState = pq.top(); pq.pop();
+        auto & [ curCost, curVertex ] = curState;
         //Process the current vertex only if its associated cost is "better"
         //than what we have recorded so far.
-        if( curCost < costAndParent[ curVertex ].first ) {
-            costAndParent[ curVertex ] = { curCost, parent };
-            if( curVertex == endVertex ) {
-                searchSuccessful = true;
-                break;
+        if( curCost > costAndParent[ curVertex ].first )
+            continue;
+        if( curVertex == endVertex ) {
+            searchSuccessful = true;
+            break;
+        }
+        for( const Graph::Edge & e : g.adjList[ curVertex ] ) {
+            int optCost;
+            switch( policy ) {
+            case MIN_MAX_WEIGHT_PATH:
+                optCost = max( curCost, e.weight ); break;
+            case SHORTEST_WEIGHT_PATH:
+                optCost = curCost + e.weight; break;
+            default:
+                //Control should not reach here since we have already
+                //checked the value of policy.
+                assert( false );
             }
-            for( const Graph::Edge & e : g.adjList[ curVertex ] ) {
-                if( e.v == parent ) continue;
-                if( e.weight < costAndParent[ e.v ].first ) {
-                    pq.push( { e.weight, { e.v, curVertex } } );
-                }
+            if( optCost < costAndParent[ e.v ].first ) {
+                costAndParent[ e.v ] = { optCost, curVertex };
+                pq.push( { optCost, e.v } );
             }
         }
     }
-    int maxPathLen = INT_MIN;
     if( searchSuccessful ) {
         int curVertex = endVertex;
         while( true ) {
             auto & [ cost, parent ] = costAndParent[ curVertex ];
             path.push_back( { parent, curVertex } );
-            maxPathLen = max( maxPathLen, cost );
             curVertex = parent;
             if( curVertex == startVertex )
                 break;
         }
         reverse( path.begin(), path.end() );
+        return costAndParent[ endVertex ].first;
     }
-    return maxPathLen;
+    return PATH_WEIGHT_NO_PATH;
 }
 
 void GraphFunctionsTest::findPathTest() {
@@ -339,6 +346,10 @@ void GraphFunctionsTest::findPathTest() {
     g.addEdgesWithWeights( edges );
 
     vector< ii > path;
-    int maxPathLen = GraphFunctions::findPath( g, 0, 6, GraphFunctions::MIN_MAX_WEIGHT_PATH, path );
-    printf( "Maximum path length = %d\n", maxPathLen );
+    int pathLen = GraphFunctions::findPath( g, 0, 6, GraphFunctions::MIN_MAX_WEIGHT_PATH, path );
+    printf( "Best path weight = %d\n", pathLen );
+
+    path.clear();
+    pathLen = GraphFunctions::findPath( g, 0, 6, GraphFunctions::SHORTEST_WEIGHT_PATH, path );
+    printf( "Best path weight = %d\n", pathLen );
 }

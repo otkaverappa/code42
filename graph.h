@@ -61,6 +61,10 @@ public:
         MIN_MAX_WEIGHT_PATH = 1,
         INVALID_POLICY = 2
     };
+    enum {
+        PATH_WEIGHT_NO_PATH = INT_MAX,
+        PATH_WEIGHT_ZERO = 0,
+    };
 public:
     static int BFS( const Graph & g, int startVertex, int endVertex ,
                     vector< int > & path );
