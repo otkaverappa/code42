@@ -18,21 +18,24 @@ int WordLadder::wordLadder( vector< string > & words, int startWordIndex, int en
 
 void WordLadderTest::sameLengthWordLadderTest() {
     vector< int > path;
-    vector< pair< vector< string >, ii > > testcases = {
-        { { "hit", "hot", "dot", "dog", "lot", "log", "cog" }, { 0, 6 } },
+    vector< pair< vector< string >, vector< ii > > > testcases = {
+        { { "hit", "hot", "dot", "dog", "lot", "log", "cog" }, { { 0, 6 } } },
         { { "fool", "pool", "poll", "pole", "pale", "sale", "sage", "page", "cage", "rage",
-            "maze", "cool" }, { 0, 9 } },
+            "maze", "cool" }, { { 0, 9 } } },
+        { { "dip", "lip", "mad", "map", "maple", "may", "pad", "pip", "pod", "pop", "sap",
+            "sip", "slice", "slick", "spice", "stick", "stock" }, { { 14, 16 }, { 5, 8 } } },
     };
 
-    for( auto & [ words, startEndIndex ] : testcases ) {
-        auto & [ startIndex, endIndex ] = startEndIndex;
-        path.clear();
-        int len = WordLadder::wordLadder( words, startIndex, endIndex, path );
-        printf( "Length = %d from [%s] to [%s]\n", len, words[ startIndex ].c_str(),
-                words[ endIndex ].c_str() );
-        for( int i = 0; i < len; ++i ) {
-            printf( "%s %s ", words[ path[i] ].c_str(), i == len - 1 ? "" : "-->" );
+    for( auto & [ words, startEndIndexVec ] : testcases ) {
+        for( auto & [ startIndex, endIndex ] : startEndIndexVec ) {
+            path.clear();
+            int len = WordLadder::wordLadder( words, startIndex, endIndex, path );
+            printf( "Length = %d from [%s] to [%s]\n", len, words[ startIndex ].c_str(),
+                    words[ endIndex ].c_str() );
+            for( int i = 0; i < len; ++i ) {
+                printf( "%s %s ", words[ path[i] ].c_str(), i == len - 1 ? "" : "-->" );
+            }
+            printf( "\n" );
         }
-        printf( "\n" );
     }
 }
